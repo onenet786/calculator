@@ -665,7 +665,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ),
                 const SizedBox(height: 12),
                 Expanded(
-                  flex: 3,
+                  flex: 4,
                   child: _DisplayPanel(
                     display: _display,
                     expression: _expression,
