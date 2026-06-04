@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter/material.dart';
 
@@ -274,12 +275,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Future<void> _setupSpeaker() async {
-    await _speaker.setLanguage(_speakUrdu ? 'ur-PK' : 'en-US');
+    await _speaker.setLanguage(
+      _useRomanUrdu ? 'en-US' : (_speakUrdu ? 'ur-PK' : 'en-US'),
+    );
     await _speaker.setSpeechRate(0.42);
     await _speaker.setPitch(1.25);
     await _speaker.setVolume(1);
     await _speaker.awaitSpeakCompletion(false);
   }
+
+  bool get _useRomanUrdu => kIsWeb && _speakUrdu;
 
   void _toggleSpeechLanguage() {
     setState(() {
@@ -294,6 +299,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Future<void> _speak(String text) async {
+    if (text.contains('\u00d8') || text.startsWith('equals ') || text == 'try again') {
+      return;
+    }
+
     if (text.contains('Ø') || text.startsWith('equals ') || text == 'try again') {
     }
 
@@ -359,6 +368,32 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   String _spokenLabelForSpeech(String value) {
+    if (_useRomanUrdu) {
+      return switch (value) {
+        '0' => 'sifar',
+        '1' => 'aik',
+        '2' => 'do',
+        '3' => 'teen',
+        '4' => 'chaar',
+        '5' => 'paanch',
+        '6' => 'chay',
+        '7' => 'saat',
+        '8' => 'aath',
+        '9' => 'nau',
+        'AC' => 'saaf',
+        '+/-' => 'jamaa manfi',
+        '%' => 'feesad',
+        _divideSymbol => 'taqseem',
+        _multiplySymbol => 'zarb',
+        '-' => 'manfi',
+        '+' => 'jamaa',
+        '.' => 'aashariya',
+        'MR' => 'memory',
+        '=' => 'barabar',
+        _ => value,
+      };
+    }
+
     if (_speakUrdu) {
       return switch (value) {
         '0' => '\u0635\u0641\u0631',
@@ -411,6 +446,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   String _answerSpeech(String answer) {
+    if (_useRomanUrdu) {
+      return 'jawab $answer';
+    }
+
     return _speakUrdu
         ? '\u062c\u0648\u0627\u0628 $answer'
         : 'answer $answer';
@@ -424,18 +463,30 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
 
+    if (_useRomanUrdu) {
+      return '$spokenExpression. jawab $answer';
+    }
+
     return _speakUrdu
         ? '$spokenExpression. \u062c\u0648\u0627\u0628 $answer'
         : '$spokenExpression. answer $answer';
   }
 
   String _tryAgainSpeech() {
+    if (_useRomanUrdu) {
+      return 'dobara koshish karein';
+    }
+
     return _speakUrdu
         ? '\u062f\u0648\u0628\u0627\u0631\u06c1 \u06a9\u0648\u0634\u0634 \u06a9\u0631\u06cc\u06ba'
         : 'please try again';
   }
 
   String _aboutSpeech() {
+    if (_useRomanUrdu) {
+      return 'Rainbow Calculator. Version $_appVersion. Powered by OneNet Solutions Pakistan.';
+    }
+
     return _speakUrdu
         ? '\u0631\u06cc\u0646\u0628\u0648 \u06a9\u06cc\u0644\u06a9\u0648\u0644\u06cc\u0679\u0631. \u0648\u0631\u0698\u0646 $_appVersion. \u067e\u0627\u0648\u0631\u0688 \u0628\u0627\u0626\u06cc \u0648\u0646 \u0646\u06cc\u0679 \u0633\u0648\u0644\u0648\u0634\u0646\u0632 \u067e\u0627\u06a9\u0633\u062a\u0627\u0646.'
         : '$_appName. Version $_appVersion. $_poweredByShort';
