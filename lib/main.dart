@@ -8,7 +8,7 @@ const String _multiplySymbol = '\u00D7';
 const String _appName = 'Rainbow Calculator';
 const String _appVersion = '1.0.0+1';
 const String _appIconAsset = 'assets/app_icon/classic_kid_icon.png';
-const String _poweredByShort = 'Powered by OneNet Solutions Pk.';
+const String _poweredByShort = 'Powered by OneNet Solutions Pakistan.';
 const String _poweredByLong = 'Powered by OneNet Solutions Pakistan';
 
 void main() {
@@ -52,9 +52,7 @@ class _SplashScreenState extends State<SplashScreen> {
         return;
       }
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute<void>(
-          builder: (_) => const CalculatorScreen(),
-        ),
+        MaterialPageRoute<void>(builder: (_) => const CalculatorScreen()),
       );
     });
   }
@@ -67,11 +65,7 @@ class _SplashScreenState extends State<SplashScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFFFF4B8),
-              Color(0xFFCFF3FF),
-              Color(0xFFFFD3F0),
-            ],
+            colors: [Color(0xFFFFF4B8), Color(0xFFCFF3FF), Color(0xFFFFD3F0)],
           ),
         ),
         child: SafeArea(
@@ -80,26 +74,17 @@ class _SplashScreenState extends State<SplashScreen> {
               const Positioned(
                 top: 42,
                 left: 28,
-                child: _SplashBubble(
-                  color: Color(0xFFFFC857),
-                  size: 70,
-                ),
+                child: _SplashBubble(color: Color(0xFFFFC857), size: 70),
               ),
               const Positioned(
                 right: 34,
                 top: 92,
-                child: _SplashBubble(
-                  color: Color(0xFF06D6A0),
-                  size: 44,
-                ),
+                child: _SplashBubble(color: Color(0xFF06D6A0), size: 44),
               ),
               const Positioned(
                 bottom: 110,
                 left: 46,
-                child: _SplashBubble(
-                  color: Color(0xFFFF6B6B),
-                  size: 52,
-                ),
+                child: _SplashBubble(color: Color(0xFFFF6B6B), size: 52),
               ),
               Center(
                 child: Padding(
@@ -124,10 +109,7 @@ class _SplashScreenState extends State<SplashScreen> {
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(34),
-                          child: Image.asset(
-                            _appIconAsset,
-                            fit: BoxFit.cover,
-                          ),
+                          child: Image.asset(_appIconAsset, fit: BoxFit.cover),
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -173,10 +155,7 @@ class _SplashScreenState extends State<SplashScreen> {
 }
 
 class _SplashBubble extends StatelessWidget {
-  const _SplashBubble({
-    required this.color,
-    required this.size,
-  });
+  const _SplashBubble({required this.color, required this.size});
 
   final Color color;
   final double size;
@@ -231,7 +210,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   double _memory = 0;
   bool _isError = false;
   bool _replaceOnNextDigit = false;
-  bool _speakUrdu = false;
+  bool _speakUrdu = true;
+  String? _lastAnswerSpeech;
+  final List<_CalculationRecord> _history = [];
   final FlutterTts _speaker = FlutterTts();
 
   @override
@@ -309,10 +290,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Future<void> _speakButton(String value) async {
-    await _speak(_spokenLabel(value));
+    await _speak(_spokenLabelForSpeech(value));
   }
 
   Future<void> _speak(String text) async {
+    if (text.contains('Ø') || text.startsWith('equals ') || text == 'try again') {
+    }
+
     try {
       await _speaker.stop();
       await _speaker.speak(text);
@@ -321,6 +305,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     }
   }
 
+  // ignore: unused_element
   String _spokenLabel(String value) {
     if (_speakUrdu) {
       return switch (value) {
@@ -371,6 +356,111 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       '=' => 'equals',
       _ => value,
     };
+  }
+
+  String _spokenLabelForSpeech(String value) {
+    if (_speakUrdu) {
+      return switch (value) {
+        '0' => '\u0635\u0641\u0631',
+        '1' => '\u0627\u06cc\u06a9',
+        '2' => '\u062f\u0648',
+        '3' => '\u062a\u06cc\u0646',
+        '4' => '\u0686\u0627\u0631',
+        '5' => '\u067e\u0627\u0646\u0686',
+        '6' => '\u0686\u06be',
+        '7' => '\u0633\u0627\u062a',
+        '8' => '\u0622\u0679\u06be',
+        '9' => '\u0646\u0648',
+        'AC' => '\u0635\u0627\u0641',
+        '+/-' => '\u062c\u0645\u0639 \u0645\u0646\u0641\u06cc',
+        '%' => '\u0641\u06cc\u0635\u062f',
+        _divideSymbol => '\u062a\u0642\u0633\u06cc\u0645',
+        _multiplySymbol => '\u0636\u0631\u0628',
+        '-' => '\u0645\u0646\u0641\u06cc',
+        '+' => '\u062c\u0645\u0639',
+        '.' => '\u0627\u0639\u0634\u0627\u0631\u06cc\u06c1',
+        'MR' => '\u0645\u06cc\u0645\u0648\u0631\u06cc',
+        '=' => '\u0628\u0631\u0627\u0628\u0631',
+        _ => value,
+      };
+    }
+
+    return switch (value) {
+      '0' => 'zero',
+      '1' => 'one',
+      '2' => 'two',
+      '3' => 'three',
+      '4' => 'four',
+      '5' => 'five',
+      '6' => 'six',
+      '7' => 'seven',
+      '8' => 'eight',
+      '9' => 'nine',
+      'AC' => 'clear',
+      '+/-' => 'plus minus',
+      '%' => 'percent',
+      _divideSymbol => 'divide',
+      _multiplySymbol => 'multiply',
+      '-' => 'minus',
+      '+' => 'plus',
+      '.' => 'point',
+      'MR' => 'memory',
+      '=' => 'equals',
+      _ => value,
+    };
+  }
+
+  String _answerSpeech(String answer) {
+    return _speakUrdu
+        ? '\u062c\u0648\u0627\u0628 $answer'
+        : 'answer $answer';
+  }
+
+  String _calculationSpeech(String expression, String answer) {
+    final parts = expression.split('');
+    final spokenExpression = parts
+        .map((part) => _spokenLabelForSpeech(part))
+        .join(' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+
+    return _speakUrdu
+        ? '$spokenExpression. \u062c\u0648\u0627\u0628 $answer'
+        : '$spokenExpression. answer $answer';
+  }
+
+  String _tryAgainSpeech() {
+    return _speakUrdu
+        ? '\u062f\u0648\u0628\u0627\u0631\u06c1 \u06a9\u0648\u0634\u0634 \u06a9\u0631\u06cc\u06ba'
+        : 'please try again';
+  }
+
+  String _aboutSpeech() {
+    return _speakUrdu
+        ? '\u0631\u06cc\u0646\u0628\u0648 \u06a9\u06cc\u0644\u06a9\u0648\u0644\u06cc\u0679\u0631. \u0648\u0631\u0698\u0646 $_appVersion. \u067e\u0627\u0648\u0631\u0688 \u0628\u0627\u0626\u06cc \u0648\u0646 \u0646\u06cc\u0679 \u0633\u0648\u0644\u0648\u0634\u0646\u0632 \u067e\u0627\u06a9\u0633\u062a\u0627\u0646.'
+        : '$_appName. Version $_appVersion. $_poweredByShort';
+  }
+
+  void _repeatLastAnswer() {
+    final text = _lastAnswerSpeech;
+    if (text == null) {
+      unawaited(_speak(_speakUrdu ? '\u067e\u06c1\u0644\u06d2 \u062d\u0633\u0627\u0628 \u06a9\u0631\u06cc\u06ba' : 'calculate first'));
+      return;
+    }
+    unawaited(_speak(text));
+  }
+
+  void _clearHistory() {
+    setState(() {
+      _history.clear();
+    });
+    unawaited(
+      _speak(
+        _speakUrdu
+            ? '\u06c1\u0633\u0679\u0631\u06cc \u0635\u0627\u0641'
+            : 'history cleared',
+      ),
+    );
   }
 
   void _appendDigitOrDecimal(String value) {
@@ -447,17 +537,32 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   void _evaluate() {
     try {
+      final calculation = _expression;
       final result = ExpressionEvaluator(_expression).evaluate();
       _memory = result;
       _expression = _formatNumber(result);
       _display = _expression;
       _isError = false;
       _replaceOnNextDigit = true;
+      _lastAnswerSpeech = _answerSpeech(_display);
+      _history.insert(
+        0,
+        _CalculationRecord(
+          expression: calculation,
+          answer: _display,
+          speech: _calculationSpeech(calculation, _display),
+        ),
+      );
+      if (_history.length > 5) {
+        _history.removeLast();
+      }
+      unawaited(_speak(_lastAnswerSpeech!));
       unawaited(_speak(_speakUrdu ? 'برابر ہے $_display' : 'equals $_display'));
     } on FormatException {
       _display = 'Try again';
       _isError = true;
       _replaceOnNextDigit = true;
+      unawaited(_speak(_tryAgainSpeech()));
       unawaited(_speak(_speakUrdu ? 'دوبارہ کوشش کریں' : 'try again'));
     }
   }
@@ -494,11 +599,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFFFF4B8),
-              Color(0xFFCFF3FF),
-              Color(0xFFFFD3F0),
-            ],
+            colors: [Color(0xFFFFF4B8), Color(0xFFCFF3FF), Color(0xFFFFD3F0)],
           ),
         ),
         child: SafeArea(
@@ -513,16 +614,31 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ),
                 const SizedBox(height: 12),
                 Expanded(
-                  flex: 2,
+                  flex: 3,
                   child: _DisplayPanel(
                     display: _display,
                     expression: _expression,
                     isError: _isError,
                   ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 10),
+                _SpeechActions(
+                  hasAnswer: _lastAnswerSpeech != null,
+                  hasHistory: _history.isNotEmpty,
+                  onRepeatAnswer: _repeatLastAnswer,
+                  onClearHistory: _clearHistory,
+                ),
+                const SizedBox(height: 10),
                 Expanded(
-                  flex: 5,
+                  flex: 1,
+                  child: _HistoryPanel(
+                    records: _history,
+                    onRepeat: (record) => unawaited(_speak(record.speech)),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Expanded(
+                  flex: 10,
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       const spacing = 10.0;
@@ -533,8 +649,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
                       return GridView.builder(
                         physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate:
-                            SliverGridDelegateWithFixedCrossAxisCount(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 4,
                           crossAxisSpacing: spacing,
                           mainAxisSpacing: spacing,
@@ -561,6 +676,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   void _showAboutInfo() {
+    unawaited(_speak(_aboutSpeech()));
     showDialog<void>(
       context: context,
       builder: (context) {
@@ -596,10 +712,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(22),
-                    child: Image.asset(
-                      _appIconAsset,
-                      fit: BoxFit.cover,
-                    ),
+                    child: Image.asset(_appIconAsset, fit: BoxFit.cover),
                   ),
                 ),
                 const SizedBox(height: 18),
@@ -640,10 +753,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   ),
                   child: const Text(
                     'OK',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w900,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
                   ),
                 ),
               ],
@@ -653,6 +763,217 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       },
     );
   }
+}
+
+class _SpeechActions extends StatelessWidget {
+  const _SpeechActions({
+    required this.hasAnswer,
+    required this.hasHistory,
+    required this.onRepeatAnswer,
+    required this.onClearHistory,
+  });
+
+  final bool hasAnswer;
+  final bool hasHistory;
+  final VoidCallback onRepeatAnswer;
+  final VoidCallback onClearHistory;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Material(
+            color: hasAnswer ? const Color(0xFF7C3AED) : Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            elevation: 5,
+            shadowColor: const Color(0x22000000),
+            child: InkWell(
+              key: const ValueKey('repeat-answer'),
+              onTap: onRepeatAnswer,
+              borderRadius: BorderRadius.circular(18),
+              child: Container(
+                height: 48,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: hasAnswer
+                        ? const Color(0xFFB39CD0)
+                        : const Color(0xFFE0E7EF),
+                    width: 3,
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.replay_rounded,
+                      color: hasAnswer ? Colors.white : const Color(0xFF7B8794),
+                      size: 24,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Repeat Answer',
+                      style: TextStyle(
+                        color: hasAnswer
+                            ? Colors.white
+                            : const Color(0xFF7B8794),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Material(
+            color: hasHistory ? const Color(0xFFFF6B6B) : Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            elevation: 5,
+            shadowColor: const Color(0x22000000),
+            child: InkWell(
+              key: const ValueKey('clear-history'),
+              onTap: onClearHistory,
+              borderRadius: BorderRadius.circular(18),
+              child: Container(
+                height: 48,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: hasHistory
+                        ? const Color(0xFFFFD1D1)
+                        : const Color(0xFFE0E7EF),
+                    width: 3,
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.delete_sweep_rounded,
+                      color: hasHistory ? Colors.white : const Color(0xFF7B8794),
+                      size: 23,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Clear History',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: hasHistory
+                            ? Colors.white
+                            : const Color(0xFF7B8794),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _HistoryPanel extends StatelessWidget {
+  const _HistoryPanel({
+    required this.records,
+    required this.onRepeat,
+  });
+
+  final List<_CalculationRecord> records;
+  final ValueChanged<_CalculationRecord> onRepeat;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.8),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: Colors.white, width: 3),
+      ),
+      child: records.isEmpty
+          ? const Center(
+              child: Text(
+                'History will appear here',
+                style: TextStyle(
+                  color: Color(0xFF7B8794),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            )
+          : ListView.separated(
+              padding: EdgeInsets.zero,
+              itemCount: records.length,
+              separatorBuilder: (_, _) => const SizedBox(height: 6),
+              itemBuilder: (context, index) {
+                final record = records[index];
+                return Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFCFF3FF),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${record.expression} = ${record.answer}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Color(0xFF243B53),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        key: ValueKey('repeat-history-$index'),
+                        onPressed: () => onRepeat(record),
+                        icon: const Icon(Icons.volume_up_rounded),
+                        color: Color(0xFF7C3AED),
+                        tooltip: 'Repeat',
+                        constraints: const BoxConstraints.tightFor(
+                          width: 34,
+                          height: 34,
+                        ),
+                        padding: EdgeInsets.zero,
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+    );
+  }
+}
+
+class _CalculationRecord {
+  const _CalculationRecord({
+    required this.expression,
+    required this.answer,
+    required this.speech,
+  });
+
+  final String expression;
+  final String answer;
+  final String speech;
 }
 
 class _InfoChip extends StatelessWidget {
@@ -773,10 +1094,7 @@ class _Header extends StatelessWidget {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(
-                    color: const Color(0xFFB39CD0),
-                    width: 3,
-                  ),
+                  border: Border.all(color: const Color(0xFFB39CD0), width: 3),
                 ),
                 child: const Icon(
                   Icons.info_rounded,
@@ -845,11 +1163,11 @@ class _DisplayPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.88),
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: Colors.white, width: 4),
+        border: Border.all(color: Colors.white, width: 2),
         boxShadow: const [
           BoxShadow(
             blurRadius: 24,
@@ -873,14 +1191,14 @@ class _DisplayPanel extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: Color(0xFF7B8794),
-                    fontSize: 12,
+                    fontSize: 9,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 1),
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerRight,
@@ -888,8 +1206,10 @@ class _DisplayPanel extends StatelessWidget {
               display,
               maxLines: 1,
               style: TextStyle(
-                color: isError ? const Color(0xFFE63946) : const Color(0xFF102A43),
-                fontSize: 44,
+                color: isError
+                    ? const Color(0xFFE63946)
+                    : const Color(0xFF102A43),
+                fontSize: 28,
                 fontWeight: FontWeight.w900,
               ),
             ),
@@ -901,10 +1221,7 @@ class _DisplayPanel extends StatelessWidget {
 }
 
 class _KidButton extends StatelessWidget {
-  const _KidButton({
-    required this.spec,
-    required this.onPressed,
-  });
+  const _KidButton({required this.spec, required this.onPressed});
 
   final _ButtonSpec spec;
   final VoidCallback onPressed;
@@ -933,7 +1250,7 @@ class _KidButton extends StatelessWidget {
               ],
             ),
             child: Padding(
-              padding: const EdgeInsets.all(7),
+              padding: const EdgeInsets.all(4),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -945,13 +1262,13 @@ class _KidButton extends StatelessWidget {
                       pictureIndex: spec.pictureIndex,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
                   Text(
                     spec.label,
                     maxLines: 1,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 22,
+                      fontSize: 18,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -1029,10 +1346,7 @@ class _MiniStar extends StatelessWidget {
 }
 
 class _PicturePainter extends CustomPainter {
-  const _PicturePainter({
-    required this.color,
-    required this.pictureIndex,
-  });
+  const _PicturePainter({required this.color, required this.pictureIndex});
 
   final Color color;
   final int pictureIndex;
@@ -1054,7 +1368,11 @@ class _PicturePainter extends CustomPainter {
 
     if (mode == 0) {
       canvas.drawCircle(center, radius * 1.25, paint);
-      canvas.drawCircle(center.translate(-radius, -radius), radius * 0.45, paint);
+      canvas.drawCircle(
+        center.translate(-radius, -radius),
+        radius * 0.45,
+        paint,
+      );
       canvas.drawCircle(center.translate(radius, radius), radius * 0.45, paint);
     } else if (mode == 1) {
       final rect = Rect.fromCenter(
@@ -1148,12 +1466,7 @@ class MathCos {
 }
 
 class _ButtonSpec {
-  const _ButtonSpec(
-    this.label,
-    this.color,
-    this.badgeColor,
-    this.pictureIndex,
-  );
+  const _ButtonSpec(this.label, this.color, this.badgeColor, this.pictureIndex);
 
   final String label;
   final Color color;
@@ -1163,9 +1476,9 @@ class _ButtonSpec {
 
 class ExpressionEvaluator {
   ExpressionEvaluator(String source)
-      : _source = source
-            .replaceAll(_multiplySymbol, '*')
-            .replaceAll(_divideSymbol, '/');
+    : _source = source
+          .replaceAll(_multiplySymbol, '*')
+          .replaceAll(_divideSymbol, '/');
 
   final String _source;
   int _index = 0;
