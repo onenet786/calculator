@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter/material.dart';
 
 const String _divideSymbol = '\u00F7';
@@ -67,16 +67,22 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   double _memory = 0;
   bool _isError = false;
   bool _replaceOnNextDigit = false;
-  final AudioPlayer _tapPlayer = AudioPlayer(playerId: 'tap_chime_player');
+  final FlutterTts _speaker = FlutterTts();
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_setupSpeaker());
+  }
 
   @override
   void dispose() {
-    _tapPlayer.dispose();
+    _speaker.stop();
     super.dispose();
   }
 
   void _buttonPressed(String value) {
-    unawaited(_playTapMusic(value));
+    unawaited(_speakButton(value));
 
     setState(() {
       if (value == 'AC') {
@@ -119,20 +125,47 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     });
   }
 
-  Future<void> _playTapMusic(String value) async {
-    final audioPath = RegExp(r'^\d$').hasMatch(value)
-        ? 'sounds/numbers/$value.wav'
-        : 'sounds/tap_chime.wav';
+  Future<void> _setupSpeaker() async {
+    await _speaker.setLanguage('en-US');
+    await _speaker.setSpeechRate(0.42);
+    await _speaker.setPitch(1.25);
+    await _speaker.setVolume(1);
+    await _speaker.awaitSpeakCompletion(false);
+  }
 
+  Future<void> _speakButton(String value) async {
     try {
-      await _tapPlayer.stop();
-      await _tapPlayer.play(
-        AssetSource(audioPath),
-        volume: 0.75,
-      );
+      await _speaker.stop();
+      await _speaker.speak(_spokenLabel(value));
     } catch (_) {
-      // Audio plugins are not available in all test environments.
+      // TTS engines are not available in all test environments.
     }
+  }
+
+  String _spokenLabel(String value) {
+    return switch (value) {
+      '0' => 'zero',
+      '1' => 'one',
+      '2' => 'two',
+      '3' => 'three',
+      '4' => 'four',
+      '5' => 'five',
+      '6' => 'six',
+      '7' => 'seven',
+      '8' => 'eight',
+      '9' => 'nine',
+      'AC' => 'clear',
+      '+/-' => 'plus minus',
+      '%' => 'percent',
+      _divideSymbol => 'divide',
+      _multiplySymbol => 'multiply',
+      '-' => 'minus',
+      '+' => 'plus',
+      '.' => 'point',
+      'MR' => 'memory',
+      '=' => 'equals',
+      _ => value,
+    };
   }
 
   void _appendDigitOrDecimal(String value) {
