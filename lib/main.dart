@@ -82,7 +82,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   void _buttonPressed(String value) {
-    unawaited(_speakButton(value));
+    if (value != '=') {
+      unawaited(_speakButton(value));
+    }
 
     setState(() {
       if (value == 'AC') {
@@ -134,9 +136,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Future<void> _speakButton(String value) async {
+    await _speak(_spokenLabel(value));
+  }
+
+  Future<void> _speak(String text) async {
     try {
       await _speaker.stop();
-      await _speaker.speak(_spokenLabel(value));
+      await _speaker.speak(text);
     } catch (_) {
       // TTS engines are not available in all test environments.
     }
@@ -248,10 +254,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       _display = _expression;
       _isError = false;
       _replaceOnNextDigit = true;
+      unawaited(_speak('equals $_display'));
     } on FormatException {
       _display = 'Try again';
       _isError = true;
       _replaceOnNextDigit = true;
+      unawaited(_speak('try again'));
     }
   }
 
