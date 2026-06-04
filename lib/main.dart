@@ -447,29 +447,245 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   String _answerSpeech(String answer) {
     if (_useRomanUrdu) {
-      return 'jawab $answer';
+      return 'jawab ${_spokenNumber(answer)}';
     }
 
     return _speakUrdu
-        ? '\u062c\u0648\u0627\u0628 $answer'
-        : 'answer $answer';
+        ? '\u062c\u0648\u0627\u0628 ${_spokenNumber(answer)}'
+        : 'answer ${_spokenNumber(answer)}';
   }
 
   String _calculationSpeech(String expression, String answer) {
-    final parts = expression.split('');
-    final spokenExpression = parts
-        .map((part) => _spokenLabelForSpeech(part))
+    final spokenExpression = _expressionTokens(expression)
+        .map((part) => _spokenExpressionToken(part))
         .join(' ')
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
 
     if (_useRomanUrdu) {
-      return '$spokenExpression. jawab $answer';
+      return '$spokenExpression. jawab ${_spokenNumber(answer)}';
     }
 
     return _speakUrdu
-        ? '$spokenExpression. \u062c\u0648\u0627\u0628 $answer'
-        : '$spokenExpression. answer $answer';
+        ? '$spokenExpression. \u062c\u0648\u0627\u0628 ${_spokenNumber(answer)}'
+        : '$spokenExpression. answer ${_spokenNumber(answer)}';
+  }
+
+  List<String> _expressionTokens(String expression) {
+    return RegExp(r'-?\d+(?:\.\d+)?|[+\-×÷%]')
+        .allMatches(expression)
+        .map((match) => match.group(0)!)
+        .toList();
+  }
+
+  String _spokenExpressionToken(String token) {
+    if (RegExp(r'^-?\d+(?:\.\d+)?$').hasMatch(token)) {
+      return _spokenNumber(token);
+    }
+
+    return _spokenLabelForSpeech(token);
+  }
+
+  String _spokenNumber(String value) {
+    if (value.startsWith('-')) {
+      final number = _spokenNumber(value.substring(1));
+      return _speakUrdu || _useRomanUrdu ? '${_spokenLabelForSpeech('-')} $number' : 'minus $number';
+    }
+
+    if (value.contains('.')) {
+      final parts = value.split('.');
+      final fraction = parts[1].split('').map(_spokenLabelForSpeech).join(' ');
+      return '${_spokenNumber(parts[0])} ${_spokenLabelForSpeech('.')} $fraction';
+    }
+
+    final number = int.tryParse(value);
+    if (number == null) {
+      return value;
+    }
+
+    if (_useRomanUrdu) {
+      return _spokenIntegerRomanUrdu(number);
+    }
+
+    if (_speakUrdu) {
+      return _spokenIntegerUrdu(number);
+    }
+
+    return _spokenIntegerEnglish(number);
+  }
+
+  String _spokenIntegerEnglish(int number) {
+    const ones = [
+      'zero',
+      'one',
+      'two',
+      'three',
+      'four',
+      'five',
+      'six',
+      'seven',
+      'eight',
+      'nine',
+      'ten',
+      'eleven',
+      'twelve',
+      'thirteen',
+      'fourteen',
+      'fifteen',
+      'sixteen',
+      'seventeen',
+      'eighteen',
+      'nineteen',
+    ];
+    const tens = [
+      '',
+      '',
+      'twenty',
+      'thirty',
+      'forty',
+      'fifty',
+      'sixty',
+      'seventy',
+      'eighty',
+      'ninety',
+    ];
+
+    if (number < 20) {
+      return ones[number];
+    }
+    if (number < 100) {
+      final rest = number % 10;
+      return rest == 0 ? tens[number ~/ 10] : '${tens[number ~/ 10]} ${ones[rest]}';
+    }
+    if (number < 1000) {
+      final rest = number % 100;
+      final hundred = '${ones[number ~/ 100]} hundred';
+      return rest == 0 ? hundred : '$hundred ${_spokenIntegerEnglish(rest)}';
+    }
+    if (number < 1000000) {
+      final rest = number % 1000;
+      final thousand = '${_spokenIntegerEnglish(number ~/ 1000)} thousand';
+      return rest == 0 ? thousand : '$thousand ${_spokenIntegerEnglish(rest)}';
+    }
+
+    return number.toString();
+  }
+
+  String _spokenIntegerRomanUrdu(int number) {
+    const ones = [
+      'sifar',
+      'aik',
+      'do',
+      'teen',
+      'chaar',
+      'paanch',
+      'chay',
+      'saat',
+      'aath',
+      'nau',
+      'das',
+      'gyarah',
+      'barah',
+      'terah',
+      'chaudah',
+      'pandrah',
+      'solah',
+      'satrah',
+      'atharah',
+      'unnees',
+    ];
+    const tens = [
+      '',
+      '',
+      'bees',
+      'tees',
+      'chaalees',
+      'pachaas',
+      'saath',
+      'sattar',
+      'assi',
+      'naway',
+    ];
+
+    if (number < 20) {
+      return ones[number];
+    }
+    if (number < 100) {
+      final rest = number % 10;
+      return rest == 0 ? tens[number ~/ 10] : '${tens[number ~/ 10]} ${ones[rest]}';
+    }
+    if (number < 1000) {
+      final rest = number % 100;
+      final hundred = '${ones[number ~/ 100]} sau';
+      return rest == 0 ? hundred : '$hundred ${_spokenIntegerRomanUrdu(rest)}';
+    }
+    if (number < 100000) {
+      final rest = number % 1000;
+      final thousand = '${_spokenIntegerRomanUrdu(number ~/ 1000)} hazaar';
+      return rest == 0 ? thousand : '$thousand ${_spokenIntegerRomanUrdu(rest)}';
+    }
+
+    return number.toString();
+  }
+
+  String _spokenIntegerUrdu(int number) {
+    const ones = [
+      '\u0635\u0641\u0631',
+      '\u0627\u06cc\u06a9',
+      '\u062f\u0648',
+      '\u062a\u06cc\u0646',
+      '\u0686\u0627\u0631',
+      '\u067e\u0627\u0646\u0686',
+      '\u0686\u06be',
+      '\u0633\u0627\u062a',
+      '\u0622\u0679\u06be',
+      '\u0646\u0648',
+      '\u062f\u0633',
+      '\u06af\u06cc\u0627\u0631\u06c1',
+      '\u0628\u0627\u0631\u06c1',
+      '\u062a\u06cc\u0631\u06c1',
+      '\u0686\u0648\u062f\u06c1',
+      '\u067e\u0646\u062f\u0631\u06c1',
+      '\u0633\u0648\u0644\u06c1',
+      '\u0633\u062a\u0631\u06c1',
+      '\u0627\u0679\u06be\u0627\u0631\u06c1',
+      '\u0627\u0646\u06cc\u0633',
+    ];
+    const tens = [
+      '',
+      '',
+      '\u0628\u06cc\u0633',
+      '\u062a\u06cc\u0633',
+      '\u0686\u0627\u0644\u06cc\u0633',
+      '\u067e\u0686\u0627\u0633',
+      '\u0633\u0627\u0679\u06be',
+      '\u0633\u062a\u0631',
+      '\u0627\u0633\u06cc',
+      '\u0646\u0648\u06d2',
+    ];
+
+    if (number == 66) {
+      return '\u0686\u06be\u06cc\u0627\u0633\u0679\u06be';
+    }
+    if (number < 20) {
+      return ones[number];
+    }
+    if (number < 100) {
+      final rest = number % 10;
+      return rest == 0 ? tens[number ~/ 10] : '${tens[number ~/ 10]} ${ones[rest]}';
+    }
+    if (number < 1000) {
+      final rest = number % 100;
+      final hundred = '${ones[number ~/ 100]} \u0633\u0648';
+      return rest == 0 ? hundred : '$hundred ${_spokenIntegerUrdu(rest)}';
+    }
+    if (number < 100000) {
+      final rest = number % 1000;
+      final thousand = '${_spokenIntegerUrdu(number ~/ 1000)} \u06c1\u0632\u0627\u0631';
+      return rest == 0 ? thousand : '$thousand ${_spokenIntegerUrdu(rest)}';
+    }
+
+    return number.toString();
   }
 
   String _tryAgainSpeech() {
@@ -688,7 +904,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   flex: 10,
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      const spacing = 10.0;
+                      const spacing = 8.0;
                       final cellWidth =
                           (constraints.maxWidth - spacing * 3) / 4;
                       final cellHeight =
@@ -1225,39 +1441,24 @@ class _KidButton extends StatelessWidget {
           child: Ink(
             decoration: BoxDecoration(
               color: spec.color,
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(18),
               boxShadow: [
                 BoxShadow(
-                  color: spec.color.withValues(alpha: 0.35),
-                  blurRadius: 14,
-                  offset: const Offset(0, 8),
+                  color: spec.color.withValues(alpha: 0.26),
+                  blurRadius: 9,
+                  offset: const Offset(0, 5),
                 ),
               ],
             ),
             child: Padding(
-              padding: const EdgeInsets.all(4),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Expanded(
+              padding: const EdgeInsets.all(3),
+              child: Center(
                     child: _PictureBadge(
                       label: spec.label,
                       background: spec.badgeColor,
-                      foreground: spec.color,
+                      foreground: const Color(0xFF243B53),
                       pictureIndex: spec.pictureIndex,
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    spec.label,
-                    maxLines: 1,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ],
               ),
             ),
           ),
@@ -1300,7 +1501,7 @@ class _PictureBadge extends StatelessWidget {
               label,
               style: TextStyle(
                 color: foreground,
-                fontSize: _isLongLabel(label) ? 15 : 24,
+                fontSize: _isLongLabel(label) ? 18 : 34,
                 fontWeight: FontWeight.w900,
               ),
             ),
