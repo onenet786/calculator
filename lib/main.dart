@@ -1,5 +1,7 @@
+import 'dart:async';
+
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 const String _divideSymbol = '\u00F7';
 const String _multiplySymbol = '\u00D7';
@@ -65,9 +67,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   double _memory = 0;
   bool _isError = false;
   bool _replaceOnNextDigit = false;
+  final AudioPlayer _tapPlayer = AudioPlayer(playerId: 'tap_chime_player');
+
+  @override
+  void dispose() {
+    _tapPlayer.dispose();
+    super.dispose();
+  }
 
   void _buttonPressed(String value) {
-    _playTapFeedback();
+    unawaited(_playTapMusic());
 
     setState(() {
       if (value == 'AC') {
@@ -110,9 +119,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     });
   }
 
-  void _playTapFeedback() {
-    SystemSound.play(SystemSoundType.click);
-    HapticFeedback.selectionClick();
+  Future<void> _playTapMusic() async {
+    try {
+      await _tapPlayer.stop();
+      await _tapPlayer.play(
+        AssetSource('sounds/tap_chime.wav'),
+        volume: 0.75,
+      );
+    } catch (_) {
+      // Audio plugins are not available in all test environments.
+    }
   }
 
   void _appendDigitOrDecimal(String value) {
