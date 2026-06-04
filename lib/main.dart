@@ -670,24 +670,20 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     display: _display,
                     expression: _expression,
                     isError: _isError,
+                    hasAnswer: _lastAnswerSpeech != null,
+                    onRepeatAnswer: _repeatLastAnswer,
                   ),
                 ),
-                const SizedBox(height: 10),
-                _SpeechActions(
-                  hasAnswer: _lastAnswerSpeech != null,
-                  hasHistory: _history.isNotEmpty,
-                  onRepeatAnswer: _repeatLastAnswer,
-                  onClearHistory: _clearHistory,
-                ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 Expanded(
-                  flex: 1,
+                  flex: 3,
                   child: _HistoryPanel(
                     records: _history,
                     onRepeat: (record) => unawaited(_speak(record.speech)),
+                    onClearHistory: _clearHistory,
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 Expanded(
                   flex: 10,
                   child: LayoutBuilder(
@@ -816,201 +812,121 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 }
 
-class _SpeechActions extends StatelessWidget {
-  const _SpeechActions({
-    required this.hasAnswer,
-    required this.hasHistory,
-    required this.onRepeatAnswer,
-    required this.onClearHistory,
-  });
-
-  final bool hasAnswer;
-  final bool hasHistory;
-  final VoidCallback onRepeatAnswer;
-  final VoidCallback onClearHistory;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Material(
-            color: hasAnswer ? const Color(0xFF7C3AED) : Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            elevation: 5,
-            shadowColor: const Color(0x22000000),
-            child: InkWell(
-              key: const ValueKey('repeat-answer'),
-              onTap: onRepeatAnswer,
-              borderRadius: BorderRadius.circular(18),
-              child: Container(
-                height: 48,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(
-                    color: hasAnswer
-                        ? const Color(0xFFB39CD0)
-                        : const Color(0xFFE0E7EF),
-                    width: 3,
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.replay_rounded,
-                      color: hasAnswer ? Colors.white : const Color(0xFF7B8794),
-                      size: 24,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Repeat Answer',
-                      style: TextStyle(
-                        color: hasAnswer
-                            ? Colors.white
-                            : const Color(0xFF7B8794),
-                        fontSize: 15,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Material(
-            color: hasHistory ? const Color(0xFFFF6B6B) : Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            elevation: 5,
-            shadowColor: const Color(0x22000000),
-            child: InkWell(
-              key: const ValueKey('clear-history'),
-              onTap: onClearHistory,
-              borderRadius: BorderRadius.circular(18),
-              child: Container(
-                height: 48,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(
-                    color: hasHistory
-                        ? const Color(0xFFFFD1D1)
-                        : const Color(0xFFE0E7EF),
-                    width: 3,
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.delete_sweep_rounded,
-                      color: hasHistory ? Colors.white : const Color(0xFF7B8794),
-                      size: 23,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Clear History',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: hasHistory
-                            ? Colors.white
-                            : const Color(0xFF7B8794),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _HistoryPanel extends StatelessWidget {
   const _HistoryPanel({
     required this.records,
     required this.onRepeat,
+    required this.onClearHistory,
   });
 
   final List<_CalculationRecord> records;
   final ValueChanged<_CalculationRecord> onRepeat;
+  final VoidCallback onClearHistory;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: Colors.white, width: 3),
+        border: Border.all(color: Colors.white, width: 2),
       ),
-      child: records.isEmpty
-          ? const Center(
-              child: Text(
-                'History will appear here',
-                style: TextStyle(
-                  color: Color(0xFF7B8794),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
+      child: Column(
+        children: [
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'History',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Color(0xFF243B53),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ),
-            )
-          : ListView.separated(
-              padding: EdgeInsets.zero,
-              itemCount: records.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 6),
-              itemBuilder: (context, index) {
-                final record = records[index];
-                return Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFCFF3FF),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          '${record.expression} = ${record.answer}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Color(0xFF243B53),
-                            fontSize: 14,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
+              IconButton(
+                key: const ValueKey('clear-history'),
+                onPressed: onClearHistory,
+                icon: const Icon(Icons.delete_sweep_rounded),
+                color: records.isEmpty
+                    ? const Color(0xFF7B8794)
+                    : const Color(0xFFFF5E78),
+                tooltip: 'Clear history',
+                constraints: const BoxConstraints.tightFor(
+                  width: 30,
+                  height: 26,
+                ),
+                padding: EdgeInsets.zero,
+              ),
+            ],
+          ),
+          const SizedBox(height: 0),
+          Expanded(
+            child: records.isEmpty
+                ? const Center(
+                    child: Text(
+                      'History will appear here',
+                      style: TextStyle(
+                        color: Color(0xFF7B8794),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
                       ),
-                      IconButton(
-                        key: ValueKey('repeat-history-$index'),
-                        onPressed: () => onRepeat(record),
-                        icon: const Icon(Icons.volume_up_rounded),
-                        color: Color(0xFF7C3AED),
-                        tooltip: 'Repeat',
-                        constraints: const BoxConstraints.tightFor(
-                          width: 34,
-                          height: 34,
+                    ),
+                  )
+                : ListView.separated(
+                    padding: EdgeInsets.zero,
+                    itemCount: records.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 6),
+                    itemBuilder: (context, index) {
+                      final record = records[index];
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
                         ),
-                        padding: EdgeInsets.zero,
-                      ),
-                    ],
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFCFF3FF),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                '${record.expression} = ${record.answer}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Color(0xFF243B53),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              key: ValueKey('repeat-history-$index'),
+                              onPressed: () => onRepeat(record),
+                              icon: const Icon(Icons.volume_up_rounded),
+                              color: Color(0xFF7C3AED),
+                              tooltip: 'Repeat',
+                              constraints: const BoxConstraints.tightFor(
+                                width: 34,
+                                height: 34,
+                              ),
+                              padding: EdgeInsets.zero,
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -1204,11 +1120,15 @@ class _DisplayPanel extends StatelessWidget {
     required this.display,
     required this.expression,
     required this.isError,
+    required this.hasAnswer,
+    required this.onRepeatAnswer,
   });
 
   final String display;
   final String expression;
   final bool isError;
+  final bool hasAnswer;
+  final VoidCallback onRepeatAnswer;
 
   @override
   Widget build(BuildContext context) {
@@ -1246,6 +1166,20 @@ class _DisplayPanel extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                   ),
                 ),
+              ),
+              IconButton(
+                key: const ValueKey('repeat-answer'),
+                onPressed: onRepeatAnswer,
+                icon: const Icon(Icons.replay_rounded),
+                color: hasAnswer
+                    ? const Color(0xFF7C3AED)
+                    : const Color(0xFF7B8794),
+                tooltip: 'Repeat answer',
+                constraints: const BoxConstraints.tightFor(
+                  width: 24,
+                  height: 20,
+                ),
+                padding: EdgeInsets.zero,
               ),
             ],
           ),
