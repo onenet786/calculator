@@ -67,6 +67,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   double _memory = 0;
   bool _isError = false;
   bool _replaceOnNextDigit = false;
+  bool _speakUrdu = false;
   final FlutterTts _speaker = FlutterTts();
 
   @override
@@ -128,11 +129,19 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Future<void> _setupSpeaker() async {
-    await _speaker.setLanguage('en-US');
+    await _speaker.setLanguage(_speakUrdu ? 'ur-PK' : 'en-US');
     await _speaker.setSpeechRate(0.42);
     await _speaker.setPitch(1.25);
     await _speaker.setVolume(1);
     await _speaker.awaitSpeakCompletion(false);
+  }
+
+  void _toggleSpeechLanguage() {
+    setState(() {
+      _speakUrdu = !_speakUrdu;
+    });
+    unawaited(_setupSpeaker());
+    unawaited(_speak(_speakUrdu ? 'اردو' : 'English'));
   }
 
   Future<void> _speakButton(String value) async {
@@ -149,6 +158,32 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   String _spokenLabel(String value) {
+    if (_speakUrdu) {
+      return switch (value) {
+        '0' => 'صفر',
+        '1' => 'ایک',
+        '2' => 'دو',
+        '3' => 'تین',
+        '4' => 'چار',
+        '5' => 'پانچ',
+        '6' => 'چھ',
+        '7' => 'سات',
+        '8' => 'آٹھ',
+        '9' => 'نو',
+        'AC' => 'صاف',
+        '+/-' => 'جمع منفی',
+        '%' => 'فیصد',
+        _divideSymbol => 'تقسیم',
+        _multiplySymbol => 'ضرب',
+        '-' => 'منفی',
+        '+' => 'جمع',
+        '.' => 'اعشاریہ',
+        'MR' => 'میموری',
+        '=' => 'برابر',
+        _ => value,
+      };
+    }
+
     return switch (value) {
       '0' => 'zero',
       '1' => 'one',
@@ -254,12 +289,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       _display = _expression;
       _isError = false;
       _replaceOnNextDigit = true;
-      unawaited(_speak('equals $_display'));
+      unawaited(_speak(_speakUrdu ? 'برابر ہے $_display' : 'equals $_display'));
     } on FormatException {
       _display = 'Try again';
       _isError = true;
       _replaceOnNextDigit = true;
-      unawaited(_speak('try again'));
+      unawaited(_speak(_speakUrdu ? 'دوبارہ کوشش کریں' : 'try again'));
     }
   }
 
@@ -307,7 +342,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
             child: Column(
               children: [
-                const _Header(),
+                _Header(
+                  speakUrdu: _speakUrdu,
+                  onLanguagePressed: _toggleSpeechLanguage,
+                ),
                 const SizedBox(height: 12),
                 Expanded(
                   flex: 2,
@@ -359,7 +397,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 }
 
 class _Header extends StatelessWidget {
-  const _Header();
+  const _Header({
+    required this.speakUrdu,
+    required this.onLanguagePressed,
+  });
+
+  final bool speakUrdu;
+  final VoidCallback onLanguagePressed;
 
   @override
   Widget build(BuildContext context) {
@@ -411,10 +455,42 @@ class _Header extends StatelessWidget {
             ],
           ),
         ),
-        const Icon(
-          Icons.music_note_rounded,
-          color: Color(0xFFFF5E78),
-          size: 30,
+        Tooltip(
+          message: speakUrdu ? 'Switch to English' : 'اردو آواز',
+          child: Material(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            elevation: 5,
+            shadowColor: const Color(0x22000000),
+            child: InkWell(
+              onTap: onLanguagePressed,
+              borderRadius: BorderRadius.circular(18),
+              child: Container(
+                width: 66,
+                height: 52,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: speakUrdu
+                        ? const Color(0xFF06D6A0)
+                        : const Color(0xFFFFC857),
+                    width: 3,
+                  ),
+                ),
+                child: Text(
+                  speakUrdu ? 'UR' : 'EN',
+                  style: TextStyle(
+                    color: speakUrdu
+                        ? const Color(0xFF00866A)
+                        : const Color(0xFFB26A00),
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ),
+          ),
         ),
       ],
     );
