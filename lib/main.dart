@@ -5,6 +5,11 @@ import 'package:flutter/material.dart';
 
 const String _divideSymbol = '\u00F7';
 const String _multiplySymbol = '\u00D7';
+const String _appName = 'Rainbow Calculator';
+const String _appVersion = '1.0.0+1';
+const String _appIconAsset = 'assets/app_icon/classic_kid_icon.png';
+const String _poweredByShort = 'Powered by OneNet Solutions Pk.';
+const String _poweredByLong = 'Powered by OneNet Solutions Pakistan';
 
 void main() {
   runApp(const CalculatorApp());
@@ -17,7 +22,7 @@ class CalculatorApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Rainbow Calculator',
+      title: _appName,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFFFFC857),
@@ -26,7 +31,166 @@ class CalculatorApp extends StatelessWidget {
         fontFamily: 'Roboto',
         useMaterial3: true,
       ),
-      home: const CalculatorScreen(),
+      home: const SplashScreen(),
+    );
+  }
+}
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future<void>.delayed(const Duration(milliseconds: 1800), () {
+      if (!mounted) {
+        return;
+      }
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute<void>(
+          builder: (_) => const CalculatorScreen(),
+        ),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFFFFF4B8),
+              Color(0xFFCFF3FF),
+              Color(0xFFFFD3F0),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Stack(
+            children: [
+              const Positioned(
+                top: 42,
+                left: 28,
+                child: _SplashBubble(
+                  color: Color(0xFFFFC857),
+                  size: 70,
+                ),
+              ),
+              const Positioned(
+                right: 34,
+                top: 92,
+                child: _SplashBubble(
+                  color: Color(0xFF06D6A0),
+                  size: 44,
+                ),
+              ),
+              const Positioned(
+                bottom: 110,
+                left: 46,
+                child: _SplashBubble(
+                  color: Color(0xFFFF6B6B),
+                  size: 52,
+                ),
+              ),
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(28),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 174,
+                        height: 174,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(44),
+                          boxShadow: const [
+                            BoxShadow(
+                              blurRadius: 36,
+                              color: Color(0x26000000),
+                              offset: Offset(0, 18),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(34),
+                          child: Image.asset(
+                            _appIconAsset,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      const Text(
+                        _appName,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Color(0xFF243B53),
+                          fontSize: 34,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      const Text(
+                        _poweredByLong,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Color(0xFF5C677D),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 28),
+                      const SizedBox(
+                        width: 110,
+                        child: LinearProgressIndicator(
+                          minHeight: 8,
+                          borderRadius: BorderRadius.all(Radius.circular(99)),
+                          backgroundColor: Colors.white,
+                          color: Color(0xFFFF6B6B),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SplashBubble extends StatelessWidget {
+  const _SplashBubble({
+    required this.color,
+    required this.size,
+  });
+
+  final Color color;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.32),
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 4),
+      ),
     );
   }
 }
@@ -345,6 +509,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 _Header(
                   speakUrdu: _speakUrdu,
                   onLanguagePressed: _toggleSpeechLanguage,
+                  onAboutPressed: _showAboutInfo,
                 ),
                 const SizedBox(height: 12),
                 Expanded(
@@ -394,16 +559,153 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       ),
     );
   }
+
+  void _showAboutInfo() {
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          insetPadding: const EdgeInsets.all(24),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(32),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(22),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(32),
+              border: Border.all(color: const Color(0xFFFFC857), width: 4),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 112,
+                  height: 112,
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFCFF3FF),
+                    borderRadius: BorderRadius.circular(28),
+                    boxShadow: const [
+                      BoxShadow(
+                        blurRadius: 18,
+                        color: Color(0x22000000),
+                        offset: Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(22),
+                    child: Image.asset(
+                      _appIconAsset,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                const Text(
+                  _appName,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Color(0xFF243B53),
+                    fontSize: 26,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const _InfoChip(
+                  icon: Icons.verified_rounded,
+                  text: 'Version $_appVersion',
+                  color: Color(0xFF06D6A0),
+                ),
+                const SizedBox(height: 10),
+                const _InfoChip(
+                  icon: Icons.favorite_rounded,
+                  text: _poweredByShort,
+                  color: Color(0xFFFF5E78),
+                ),
+                const SizedBox(height: 18),
+                FilledButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF7C3AED),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 28,
+                      vertical: 14,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                  ),
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _InfoChip extends StatelessWidget {
+  const _InfoChip({
+    required this.icon,
+    required this.text,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: color.withValues(alpha: 0.34), width: 2),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 24),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                color: Color(0xFF243B53),
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _Header extends StatelessWidget {
   const _Header({
     required this.speakUrdu,
     required this.onLanguagePressed,
+    required this.onAboutPressed,
   });
 
   final bool speakUrdu;
   final VoidCallback onLanguagePressed;
+  final VoidCallback onAboutPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -455,6 +757,37 @@ class _Header extends StatelessWidget {
             ],
           ),
         ),
+        Tooltip(
+          message: 'About',
+          child: Material(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            elevation: 5,
+            shadowColor: const Color(0x22000000),
+            child: InkWell(
+              onTap: onAboutPressed,
+              borderRadius: BorderRadius.circular(18),
+              child: Container(
+                width: 52,
+                height: 52,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: const Color(0xFFB39CD0),
+                    width: 3,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.info_rounded,
+                  color: Color(0xFF7C3AED),
+                  size: 28,
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
         Tooltip(
           message: speakUrdu ? 'Switch to English' : 'اردو آواز',
           child: Material(
