@@ -76,7 +76,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   void _buttonPressed(String value) {
-    unawaited(_playTapMusic());
+    unawaited(_playTapMusic(value));
 
     setState(() {
       if (value == 'AC') {
@@ -119,11 +119,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     });
   }
 
-  Future<void> _playTapMusic() async {
+  Future<void> _playTapMusic(String value) async {
+    final audioPath = RegExp(r'^\d$').hasMatch(value)
+        ? 'sounds/numbers/$value.wav'
+        : 'sounds/tap_chime.wav';
+
     try {
       await _tapPlayer.stop();
       await _tapPlayer.play(
-        AssetSource('sounds/tap_chime.wav'),
+        AssetSource(audioPath),
         volume: 0.75,
       );
     } catch (_) {
