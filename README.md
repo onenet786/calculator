@@ -1,17 +1,24 @@
-# calculator
+# Rainbow Calculator
 
-A new Flutter project.
+Rainbow Calculator is a colorful Flutter calculator for children and early learners. It combines arithmetic, spoken answers, bilingual learning support, multiplication tables, counting practice, voice commands, and calculation history.
 
-## Getting Started
+## Documentation
 
-This project is a starting point for a Flutter application.
+Full app documentation with screenshots is available here:
 
-A few resources to get you started if this is your first Flutter project:
+[docs/APP_DOCUMENTATION.md](docs/APP_DOCUMENTATION.md)
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## Quick Start
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```powershell
+flutter pub get
+flutter analyze
+flutter test
+flutter run -d chrome
+```
+
+## Screenshots
+
+![Rainbow Calculator home screen](docs/screenshots/home.png)
+
+![Learning menu](docs/screenshots/learning-menu.png)

@@ -1099,6 +1099,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             }
             return;
           }
+          if (_isRecoverableSpeechError(error.errorMsg)) {
+            setState(() {
+              _isListeningForCommand = false;
+              _isRetryingSpeechListen = false;
+              _voiceCommandStatus = _speakUrdu
+                  ? 'دوبارہ کوشش کریں: ٹیبل یا گنتی کہیں'
+                  : 'Could not hear that. Tap mic and try again';
+            });
+            return;
+          }
           setState(() {
             _isListeningForCommand = false;
             _voiceCommandStatus = error.permanent
@@ -1187,6 +1197,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         unawaited(_handleLearningCommand(command));
       },
     );
+  }
+
+  bool _isRecoverableSpeechError(String errorMsg) {
+    return errorMsg == 'error_no_match' ||
+        errorMsg == 'error_speech_timeout' ||
+        errorMsg == 'error_client';
   }
 
   String _speechServiceHint() {
