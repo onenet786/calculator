@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter/material.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 const String _divideSymbol = '\u00F7';
 const String _multiplySymbol = '\u00D7';
@@ -11,6 +12,212 @@ const String _appVersion = '1.0.0+1';
 const String _appIconAsset = 'assets/app_icon/classic_kid_icon.png';
 const String _poweredByShort = 'Powered by OneNet Solutions Pakistan.';
 const String _poweredByLong = 'Powered by OneNet Solutions Pakistan';
+const Map<int, String> _romanUrduNumbers = {
+  0: 'sifar',
+  1: 'aik',
+  2: 'do',
+  3: 'teen',
+  4: 'chaar',
+  5: 'paanch',
+  6: 'chay',
+  7: 'saat',
+  8: 'aath',
+  9: 'nau',
+  10: 'das',
+  11: 'gyarah',
+  12: 'barah',
+  13: 'terah',
+  14: 'chaudah',
+  15: 'pandrah',
+  16: 'solah',
+  17: 'satrah',
+  18: 'atharah',
+  19: 'unnees',
+  20: 'bees',
+  21: 'ikkees',
+  22: 'baees',
+  23: 'taees',
+  24: 'chaubees',
+  25: 'pachees',
+  26: 'chhabbees',
+  27: 'sattaees',
+  28: 'atthaees',
+  29: 'untees',
+  30: 'tees',
+  31: 'iktees',
+  32: 'battees',
+  33: 'tentees',
+  34: 'chauntees',
+  35: 'paintees',
+  36: 'chhattees',
+  37: 'saintees',
+  38: 'artees',
+  39: 'untalees',
+  40: 'chaalees',
+  41: 'iktalees',
+  42: 'bayalees',
+  43: 'taintalees',
+  44: 'chawalees',
+  45: 'paintalees',
+  46: 'chiyalees',
+  47: 'saintalees',
+  48: 'artalees',
+  49: 'unchaas',
+  50: 'pachaas',
+  51: 'ikyaavan',
+  52: 'baavan',
+  53: 'tirpan',
+  54: 'chauvan',
+  55: 'pachpan',
+  56: 'chhappan',
+  57: 'sattaavan',
+  58: 'atthaavan',
+  59: 'unsath',
+  60: 'saath',
+  61: 'iksath',
+  62: 'basath',
+  63: 'tirsath',
+  64: 'chaunsath',
+  65: 'painsath',
+  66: 'chhiyaasath',
+  67: 'sarsath',
+  68: 'arsath',
+  69: 'unhattar',
+  70: 'sattar',
+  71: 'ikhattar',
+  72: 'bahattar',
+  73: 'tihattar',
+  74: 'chauhattar',
+  75: 'pachhattar',
+  76: 'chhihattar',
+  77: 'sathattar',
+  78: 'atthattar',
+  79: 'unasi',
+  80: 'assi',
+  81: 'ikyasi',
+  82: 'bayasi',
+  83: 'tirasi',
+  84: 'chaurasi',
+  85: 'pachasi',
+  86: 'chhiyasi',
+  87: 'sattasi',
+  88: 'atthasi',
+  89: 'navasi',
+  90: 'naway',
+  91: 'ikyanaway',
+  92: 'banaway',
+  93: 'tiranaway',
+  94: 'chauranaway',
+  95: 'pachaanaway',
+  96: 'chhiyanaway',
+  97: 'sattanaway',
+  98: 'atthanaway',
+  99: 'ninnanaway',
+  100: 'sau',
+};
+const Map<int, String> _urduNumbers = {
+  0: 'صفر',
+  1: 'ایک',
+  2: 'دو',
+  3: 'تین',
+  4: 'چار',
+  5: 'پانچ',
+  6: 'چھ',
+  7: 'سات',
+  8: 'آٹھ',
+  9: 'نو',
+  10: 'دس',
+  11: 'گیارہ',
+  12: 'بارہ',
+  13: 'تیرہ',
+  14: 'چودہ',
+  15: 'پندرہ',
+  16: 'سولہ',
+  17: 'سترہ',
+  18: 'اٹھارہ',
+  19: 'انیس',
+  20: 'بیس',
+  21: 'اکیس',
+  22: 'بائیس',
+  23: 'تئیس',
+  24: 'چوبیس',
+  25: 'پچیس',
+  26: 'چھبیس',
+  27: 'ستائیس',
+  28: 'اٹھائیس',
+  29: 'انتیس',
+  30: 'تیس',
+  31: 'اکتیس',
+  32: 'بتیس',
+  33: 'تینتیس',
+  34: 'چونتیس',
+  35: 'پینتیس',
+  36: 'چھتیس',
+  37: 'سینتیس',
+  38: 'اڑتیس',
+  39: 'انتالیس',
+  40: 'چالیس',
+  41: 'اکتالیس',
+  42: 'بیالیس',
+  43: 'تینتالیس',
+  44: 'چوالیس',
+  45: 'پینتالیس',
+  46: 'چھیالیس',
+  47: 'سنتالیس',
+  48: 'اڑتالیس',
+  49: 'انچاس',
+  50: 'پچاس',
+  51: 'اکاون',
+  52: 'باون',
+  53: 'ترپن',
+  54: 'چون',
+  55: 'پچپن',
+  56: 'چھپن',
+  57: 'ستاون',
+  58: 'اٹھاون',
+  59: 'انسٹھ',
+  60: 'ساٹھ',
+  61: 'اکسٹھ',
+  62: 'باسٹھ',
+  63: 'تریسٹھ',
+  64: 'چونسٹھ',
+  65: 'پینسٹھ',
+  66: 'چھاسٹھ',
+  67: 'سڑسٹھ',
+  68: 'اڑسٹھ',
+  69: 'انہتر',
+  70: 'ستر',
+  71: 'اکہتر',
+  72: 'بہتر',
+  73: 'تہتر',
+  74: 'چوہتر',
+  75: 'پچھتر',
+  76: 'چھہتر',
+  77: 'ستتر',
+  78: 'اٹھتر',
+  79: 'اناسی',
+  80: 'اسی',
+  81: 'اکیاسی',
+  82: 'بیاسی',
+  83: 'تراسی',
+  84: 'چوراسی',
+  85: 'پچاسی',
+  86: 'چھیاسی',
+  87: 'ستاسی',
+  88: 'اٹھاسی',
+  89: 'نواسی',
+  90: 'نوے',
+  91: 'اکیانوے',
+  92: 'بانوے',
+  93: 'ترانوے',
+  94: 'چورانوے',
+  95: 'پچانوے',
+  96: 'چھیانوے',
+  97: 'ستانوے',
+  98: 'اٹھانوے',
+  99: 'ننانوے',
+  100: 'سو',
+};
 
 void main() {
   runApp(const CalculatorApp());
@@ -45,10 +252,13 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  final FlutterTts _splashSpeaker = FlutterTts();
+
   @override
   void initState() {
     super.initState();
-    Future<void>.delayed(const Duration(milliseconds: 1800), () {
+    unawaited(_speakLoadingMessage());
+    Future<void>.delayed(const Duration(milliseconds: 4500), () {
       if (!mounted) {
         return;
       }
@@ -56,6 +266,26 @@ class _SplashScreenState extends State<SplashScreen> {
         MaterialPageRoute<void>(builder: (_) => const CalculatorScreen()),
       );
     });
+  }
+
+  @override
+  void dispose() {
+    _splashSpeaker.stop();
+    super.dispose();
+  }
+
+  Future<void> _speakLoadingMessage() async {
+    try {
+      await _splashSpeaker.setLanguage('en-US');
+      await _splashSpeaker.setSpeechRate(0.38);
+      await _splashSpeaker.setPitch(1.2);
+      await _splashSpeaker.setVolume(1);
+      await _splashSpeaker.speak(
+        'Loading Rainbow Calculator by OneNet Solutions',
+      );
+    } catch (_) {
+      // TTS engines are not available in all test environments.
+    }
   }
 
   @override
@@ -212,9 +442,17 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   bool _isError = false;
   bool _replaceOnNextDigit = false;
   bool _speakUrdu = true;
-  String? _lastAnswerSpeech;
+  String? _lastAnswerValue;
+  bool _isCountingSequenceActive = false;
+  bool _isTableSequenceActive = false;
+  int? _activeTableNumber;
+  int? _activeTableLine;
+  int? _activeCountingNumber;
+  bool _isListeningForCommand = false;
+  String _voiceCommandStatus = 'Tap mic and say table or counting';
   final List<_CalculationRecord> _history = [];
   final FlutterTts _speaker = FlutterTts();
+  final stt.SpeechToText _speech = stt.SpeechToText();
 
   @override
   void initState() {
@@ -224,6 +462,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   @override
   void dispose() {
+    _speech.stop();
     _speaker.stop();
     super.dispose();
   }
@@ -286,11 +525,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   bool get _useRomanUrdu => kIsWeb && _speakUrdu;
 
-  void _toggleSpeechLanguage() {
+  Future<void> _toggleSpeechLanguage() async {
     setState(() {
       _speakUrdu = !_speakUrdu;
     });
-    unawaited(_setupSpeaker());
+    await _setupSpeaker();
     unawaited(_speak(_speakUrdu ? 'اردو' : 'English'));
   }
 
@@ -299,16 +538,30 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Future<void> _speak(String text) async {
-    if (text.contains('\u00d8') || text.startsWith('equals ') || text == 'try again') {
+    if (text.contains('\u00d8') ||
+        text.startsWith('equals ') ||
+        text == 'try again') {
       return;
     }
 
-    if (text.contains('Ø') || text.startsWith('equals ') || text == 'try again') {
-    }
+    if (text.contains('Ø') ||
+        text.startsWith('equals ') ||
+        text == 'try again') {}
 
     try {
       await _speaker.stop();
       await _speaker.speak(text);
+    } catch (_) {
+      // TTS engines are not available in all test environments.
+    }
+  }
+
+  Future<void> _stopSpeakerSafely() async {
+    try {
+      await _speaker.stop().timeout(
+        const Duration(milliseconds: 500),
+        onTimeout: () => 0,
+      );
     } catch (_) {
       // TTS engines are not available in all test environments.
     }
@@ -472,10 +725,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   List<String> _expressionTokens(String expression) {
-    return RegExp(r'-?\d+(?:\.\d+)?|[+\-×÷%]')
-        .allMatches(expression)
-        .map((match) => match.group(0)!)
-        .toList();
+    return RegExp(
+      r'-?\d+(?:\.\d+)?|[+\-×÷%]',
+    ).allMatches(expression).map((match) => match.group(0)!).toList();
   }
 
   String _spokenExpressionToken(String token) {
@@ -489,7 +741,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   String _spokenNumber(String value) {
     if (value.startsWith('-')) {
       final number = _spokenNumber(value.substring(1));
-      return _speakUrdu || _useRomanUrdu ? '${_spokenLabelForSpeech('-')} $number' : 'minus $number';
+      return _speakUrdu || _useRomanUrdu
+          ? '${_spokenLabelForSpeech('-')} $number'
+          : 'minus $number';
     }
 
     if (value.contains('.')) {
@@ -555,7 +809,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     }
     if (number < 100) {
       final rest = number % 10;
-      return rest == 0 ? tens[number ~/ 10] : '${tens[number ~/ 10]} ${ones[rest]}';
+      return rest == 0
+          ? tens[number ~/ 10]
+          : '${tens[number ~/ 10]} ${ones[rest]}';
     }
     if (number < 1000) {
       final rest = number % 100;
@@ -572,116 +828,38 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   String _spokenIntegerRomanUrdu(int number) {
-    const ones = [
-      'sifar',
-      'aik',
-      'do',
-      'teen',
-      'chaar',
-      'paanch',
-      'chay',
-      'saat',
-      'aath',
-      'nau',
-      'das',
-      'gyarah',
-      'barah',
-      'terah',
-      'chaudah',
-      'pandrah',
-      'solah',
-      'satrah',
-      'atharah',
-      'unnees',
-    ];
-    const tens = [
-      '',
-      '',
-      'bees',
-      'tees',
-      'chaalees',
-      'pachaas',
-      'saath',
-      'sattar',
-      'assi',
-      'naway',
-    ];
-
-    if (number < 20) {
-      return ones[number];
-    }
-    if (number < 100) {
-      final rest = number % 10;
-      return rest == 0 ? tens[number ~/ 10] : '${tens[number ~/ 10]} ${ones[rest]}';
+    if (number <= 100) {
+      return _romanUrduNumbers[number] ?? number.toString();
     }
     if (number < 1000) {
       final rest = number % 100;
-      final hundred = '${ones[number ~/ 100]} sau';
+      final hundred = '${_romanUrduNumbers[number ~/ 100]} sau';
       return rest == 0 ? hundred : '$hundred ${_spokenIntegerRomanUrdu(rest)}';
     }
     if (number < 100000) {
       final rest = number % 1000;
       final thousand = '${_spokenIntegerRomanUrdu(number ~/ 1000)} hazaar';
-      return rest == 0 ? thousand : '$thousand ${_spokenIntegerRomanUrdu(rest)}';
+      return rest == 0
+          ? thousand
+          : '$thousand ${_spokenIntegerRomanUrdu(rest)}';
     }
 
     return number.toString();
   }
 
   String _spokenIntegerUrdu(int number) {
-    const ones = [
-      '\u0635\u0641\u0631',
-      '\u0627\u06cc\u06a9',
-      '\u062f\u0648',
-      '\u062a\u06cc\u0646',
-      '\u0686\u0627\u0631',
-      '\u067e\u0627\u0646\u0686',
-      '\u0686\u06be',
-      '\u0633\u0627\u062a',
-      '\u0622\u0679\u06be',
-      '\u0646\u0648',
-      '\u062f\u0633',
-      '\u06af\u06cc\u0627\u0631\u06c1',
-      '\u0628\u0627\u0631\u06c1',
-      '\u062a\u06cc\u0631\u06c1',
-      '\u0686\u0648\u062f\u06c1',
-      '\u067e\u0646\u062f\u0631\u06c1',
-      '\u0633\u0648\u0644\u06c1',
-      '\u0633\u062a\u0631\u06c1',
-      '\u0627\u0679\u06be\u0627\u0631\u06c1',
-      '\u0627\u0646\u06cc\u0633',
-    ];
-    const tens = [
-      '',
-      '',
-      '\u0628\u06cc\u0633',
-      '\u062a\u06cc\u0633',
-      '\u0686\u0627\u0644\u06cc\u0633',
-      '\u067e\u0686\u0627\u0633',
-      '\u0633\u0627\u0679\u06be',
-      '\u0633\u062a\u0631',
-      '\u0627\u0633\u06cc',
-      '\u0646\u0648\u06d2',
-    ];
-
-    if (number == 66) {
-      return '\u0686\u06be\u06cc\u0627\u0633\u0679\u06be';
-    }
-    if (number < 20) {
-      return ones[number];
-    }
-    if (number < 100) {
-      final rest = number % 10;
-      return rest == 0 ? tens[number ~/ 10] : '${tens[number ~/ 10]} ${ones[rest]}';
+    if (number <= 100) {
+      return _urduNumbers[number] ?? number.toString();
     }
     if (number < 1000) {
       final rest = number % 100;
-      final hundred = '${ones[number ~/ 100]} \u0633\u0648';
+      final hundred = '${_urduNumbers[number ~/ 100]} \u0633\u0648';
       return rest == 0 ? hundred : '$hundred ${_spokenIntegerUrdu(rest)}';
     }
     if (number < 100000) {
       final rest = number % 1000;
-      final thousand = '${_spokenIntegerUrdu(number ~/ 1000)} \u06c1\u0632\u0627\u0631';
+      final thousand =
+          '${_spokenIntegerUrdu(number ~/ 1000)} \u06c1\u0632\u0627\u0631';
       return rest == 0 ? thousand : '$thousand ${_spokenIntegerUrdu(rest)}';
     }
 
@@ -709,12 +887,18 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   void _repeatLastAnswer() {
-    final text = _lastAnswerSpeech;
-    if (text == null) {
-      unawaited(_speak(_speakUrdu ? '\u067e\u06c1\u0644\u06d2 \u062d\u0633\u0627\u0628 \u06a9\u0631\u06cc\u06ba' : 'calculate first'));
+    final value = _lastAnswerValue;
+    if (value == null) {
+      unawaited(
+        _speak(
+          _speakUrdu
+              ? '\u067e\u06c1\u0644\u06d2 \u062d\u0633\u0627\u0628 \u06a9\u0631\u06cc\u06ba'
+              : 'calculate first',
+        ),
+      );
       return;
     }
-    unawaited(_speak(text));
+    unawaited(_speak(_answerSpeech(value)));
   }
 
   void _clearHistory() {
@@ -728,6 +912,329 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             : 'history cleared',
       ),
     );
+  }
+
+  Future<void> _speakTable(int number) async {
+    setState(() {
+      _isCountingSequenceActive = false;
+      _isTableSequenceActive = true;
+      _activeCountingNumber = null;
+      _activeTableNumber = number;
+      _activeTableLine = null;
+    });
+    await _stopSpeakerSafely();
+
+    final tableName = '${_spokenNumber(number.toString())} table';
+    unawaited(_speak(tableName));
+    await Future<void>.delayed(const Duration(milliseconds: 1200));
+
+    for (var index = 0; index < 10; index++) {
+      if (!mounted || !_isTableSequenceActive || _activeTableNumber != number) {
+        return;
+      }
+      final multiplier = index + 1;
+      final answer = number * multiplier;
+      final line = _speakUrdu || _useRomanUrdu
+          ? '${_spokenNumber(number.toString())} ${_spokenLabelForSpeech(_multiplySymbol)} ${_spokenNumber(multiplier.toString())} ${_spokenLabelForSpeech('=')} ${_spokenNumber(answer.toString())}'
+          : '$number times $multiplier equals $answer';
+      setState(() {
+        _activeTableLine = multiplier;
+      });
+      unawaited(_speak(line));
+      await Future<void>.delayed(const Duration(milliseconds: 2400));
+    }
+
+    if (!mounted || !_isTableSequenceActive || _activeTableNumber != number) {
+      return;
+    }
+    setState(() {
+      _isTableSequenceActive = false;
+      _activeTableNumber = null;
+      _activeTableLine = null;
+    });
+  }
+
+  Future<void> _startCountingSpeech() async {
+    setState(() {
+      _isCountingSequenceActive = true;
+      _isTableSequenceActive = false;
+      _activeTableNumber = null;
+      _activeTableLine = null;
+      _activeCountingNumber = null;
+    });
+    await _stopSpeakerSafely();
+    await _speakCountingBlock(1);
+  }
+
+  Future<void> _speakCountingBlock(int start) async {
+    if (!_isCountingSequenceActive || !mounted) {
+      return;
+    }
+
+    final end = (start + 9).clamp(1, 100);
+    for (var number = start; number <= end; number++) {
+      if (!_isCountingSequenceActive || !mounted) {
+        return;
+      }
+      setState(() {
+        _activeCountingNumber = number;
+      });
+      unawaited(_speak(_spokenNumber(number.toString())));
+      await Future<void>.delayed(const Duration(milliseconds: 800));
+    }
+
+    if (!_isCountingSequenceActive || !mounted || end >= 100) {
+      setState(() {
+        _isCountingSequenceActive = false;
+        _activeCountingNumber = null;
+      });
+      return;
+    }
+
+    unawaited(
+      _speak(
+        _speakUrdu || _useRomanUrdu
+            ? 'گنتی جاری رکھنا چاہتے ہیں؟'
+            : 'continue counting?',
+      ),
+    );
+
+    final shouldContinue = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        final isUrduPrompt = _speakUrdu || _useRomanUrdu;
+        final urduButtonStyle = isUrduPrompt
+            ? const TextStyle(fontSize: 22, fontWeight: FontWeight.w900)
+            : null;
+        return AlertDialog(
+          title: Text(
+            isUrduPrompt ? 'گنتی جاری رکھنا چاہتے ہیں؟' : 'Continue counting?',
+          ),
+          content: Text('$start - $end complete'),
+          actions: [
+            TextButton(
+              key: const ValueKey('cancel-counting'),
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(
+                isUrduPrompt ? 'نہیں' : 'Cancel',
+                style: urduButtonStyle,
+              ),
+            ),
+            FilledButton(
+              key: const ValueKey('continue-counting'),
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(
+                isUrduPrompt ? 'ہاں' : 'Continue',
+                style: urduButtonStyle,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldContinue == true) {
+      await _speakCountingBlock(end + 1);
+      return;
+    }
+
+    setState(() {
+      _isCountingSequenceActive = false;
+      _activeCountingNumber = null;
+    });
+    await _stopSpeakerSafely();
+  }
+
+  void _stopLearningSpeech() {
+    setState(() {
+      _isCountingSequenceActive = false;
+      _isTableSequenceActive = false;
+      _activeTableNumber = null;
+      _activeTableLine = null;
+      _activeCountingNumber = null;
+    });
+    unawaited(_stopSpeakerSafely());
+  }
+
+  Future<void> _listenForLearningCommand() async {
+    if (_isListeningForCommand) {
+      await _speech.stop();
+      if (mounted) {
+        setState(() {
+          _isListeningForCommand = false;
+          _voiceCommandStatus = 'Tap mic and say table or counting';
+        });
+      }
+      return;
+    }
+
+    try {
+      final available = await _speech.initialize(
+        onStatus: (status) {
+          if (!mounted) {
+            return;
+          }
+          if (status == 'done' || status == 'notListening') {
+            setState(() {
+              _isListeningForCommand = false;
+            });
+          }
+        },
+        onError: (_) {
+          if (!mounted) {
+            return;
+          }
+          setState(() {
+            _isListeningForCommand = false;
+            _voiceCommandStatus = 'Mic not ready';
+          });
+          unawaited(
+            _speak(_speakUrdu ? 'مائک تیار نہیں' : 'microphone not ready'),
+          );
+        },
+      );
+
+      if (!available) {
+        if (!mounted) {
+          return;
+        }
+        setState(() {
+          _voiceCommandStatus = 'Mic permission needed';
+        });
+        unawaited(
+          _speak(
+            _speakUrdu ? 'مائک اجازت دیں' : 'microphone permission needed',
+          ),
+        );
+        return;
+      }
+
+      setState(() {
+        _isListeningForCommand = true;
+        _voiceCommandStatus = _speakUrdu
+            ? 'بولیں: ٹیبل یا گنتی'
+            : 'Say: read table 2 or counting';
+      });
+
+      // ignore: deprecated_member_use
+      await _speech.listen(
+        // ignore: deprecated_member_use
+        localeId: _speakUrdu ? 'ur_PK' : 'en_US',
+        // ignore: deprecated_member_use
+        listenFor: const Duration(seconds: 6),
+        // ignore: deprecated_member_use
+        pauseFor: const Duration(seconds: 2),
+        onResult: (result) {
+          if (!result.finalResult) {
+            return;
+          }
+          final command = result.recognizedWords.trim();
+          if (command.isEmpty) {
+            return;
+          }
+          unawaited(_handleLearningCommand(command));
+        },
+      );
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _isListeningForCommand = false;
+        _voiceCommandStatus = 'Mic not ready';
+      });
+    }
+  }
+
+  Future<void> _handleLearningCommand(String command) async {
+    await _speech.stop();
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _isListeningForCommand = false;
+      _voiceCommandStatus = command;
+    });
+
+    final normalized = command.toLowerCase();
+    if (normalized.contains('count') ||
+        normalized.contains('ginti') ||
+        command.contains('گنتی')) {
+      await _startCountingSpeech();
+      return;
+    }
+
+    final tableNumber = _numberFromLearningCommand(command);
+    if (tableNumber != null) {
+      await _speakTable(tableNumber);
+      return;
+    }
+
+    unawaited(
+      _speak(
+        _speakUrdu
+            ? 'براہ کرم ٹیبل یا گنتی کہیں'
+            : 'please say table or counting',
+      ),
+    );
+  }
+
+  int? _numberFromLearningCommand(String command) {
+    final lower = command.toLowerCase();
+    final digitMatch = RegExp(r'\b(?:10|[2-9])\b').firstMatch(lower);
+    if (digitMatch != null) {
+      return int.parse(digitMatch.group(0)!);
+    }
+
+    const words = {
+      'two': 2,
+      'three': 3,
+      'four': 4,
+      'five': 5,
+      'six': 6,
+      'seven': 7,
+      'eight': 8,
+      'nine': 9,
+      'ten': 10,
+      'do': 2,
+      'teen': 3,
+      'chaar': 4,
+      'char': 4,
+      'paanch': 5,
+      'panch': 5,
+      'chay': 6,
+      'che': 6,
+      'saat': 7,
+      'aath': 8,
+      'nau': 9,
+      'das': 10,
+    };
+    for (final entry in words.entries) {
+      if (lower.contains(entry.key)) {
+        return entry.value;
+      }
+    }
+
+    const urduWords = {
+      'دو': 2,
+      'تین': 3,
+      'چار': 4,
+      'پانچ': 5,
+      'چھ': 6,
+      'سات': 7,
+      'آٹھ': 8,
+      'آٹھ': 8,
+      'نو': 9,
+      'دس': 10,
+    };
+    for (final entry in urduWords.entries) {
+      if (command.contains(entry.key)) {
+        return entry.value;
+      }
+    }
+
+    return null;
   }
 
   void _appendDigitOrDecimal(String value) {
@@ -811,26 +1318,20 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       _display = _expression;
       _isError = false;
       _replaceOnNextDigit = true;
-      _lastAnswerSpeech = _answerSpeech(_display);
+      _lastAnswerValue = _display;
       _history.insert(
         0,
-        _CalculationRecord(
-          expression: calculation,
-          answer: _display,
-          speech: _calculationSpeech(calculation, _display),
-        ),
+        _CalculationRecord(expression: calculation, answer: _display),
       );
       if (_history.length > 5) {
         _history.removeLast();
       }
-      unawaited(_speak(_lastAnswerSpeech!));
-      unawaited(_speak(_speakUrdu ? 'برابر ہے $_display' : 'equals $_display'));
+      unawaited(_speak(_answerSpeech(_display)));
     } on FormatException {
       _display = 'Try again';
       _isError = true;
       _replaceOnNextDigit = true;
       unawaited(_speak(_tryAgainSpeech()));
-      unawaited(_speak(_speakUrdu ? 'دوبارہ کوشش کریں' : 'try again'));
     }
   }
 
@@ -861,6 +1362,18 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: _LearningDrawer(
+        onTablePressed: _speakTable,
+        onCountingPressed: _startCountingSpeech,
+        onStopPressed: _stopLearningSpeech,
+        onMicPressed: _listenForLearningCommand,
+        isSpeakingLearning: _isTableSequenceActive || _isCountingSequenceActive,
+        isListeningForCommand: _isListeningForCommand,
+        voiceCommandStatus: _voiceCommandStatus,
+        activeTableNumber: _activeTableNumber,
+        activeTableLine: _activeTableLine,
+        activeCountingNumber: _activeCountingNumber,
+      ),
       body: DecoratedBox(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -874,10 +1387,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
             child: Column(
               children: [
-                _Header(
-                  speakUrdu: _speakUrdu,
-                  onLanguagePressed: _toggleSpeechLanguage,
-                  onAboutPressed: _showAboutInfo,
+                Builder(
+                  builder: (context) {
+                    return _Header(
+                      speakUrdu: _speakUrdu,
+                      onCapPressed: () => Scaffold.of(context).openDrawer(),
+                      onLanguagePressed: _toggleSpeechLanguage,
+                      onAboutPressed: _showAboutInfo,
+                    );
+                  },
                 ),
                 const SizedBox(height: 12),
                 Expanded(
@@ -886,7 +1404,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     display: _display,
                     expression: _expression,
                     isError: _isError,
-                    hasAnswer: _lastAnswerSpeech != null,
+                    hasAnswer: _lastAnswerValue != null,
                     onRepeatAnswer: _repeatLastAnswer,
                   ),
                 ),
@@ -895,7 +1413,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   flex: 3,
                   child: _HistoryPanel(
                     records: _history,
-                    onRepeat: (record) => unawaited(_speak(record.speech)),
+                    onRepeat: (record) => unawaited(
+                      _speak(
+                        _calculationSpeech(record.expression, record.answer),
+                      ),
+                    ),
                     onClearHistory: _clearHistory,
                   ),
                 ),
@@ -1028,6 +1550,650 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 }
 
+class _LearningDrawer extends StatelessWidget {
+  const _LearningDrawer({
+    required this.onTablePressed,
+    required this.onCountingPressed,
+    required this.onStopPressed,
+    required this.onMicPressed,
+    required this.isSpeakingLearning,
+    required this.isListeningForCommand,
+    required this.voiceCommandStatus,
+    required this.activeTableNumber,
+    required this.activeTableLine,
+    required this.activeCountingNumber,
+  });
+
+  final ValueChanged<int> onTablePressed;
+  final VoidCallback onCountingPressed;
+  final VoidCallback onStopPressed;
+  final VoidCallback onMicPressed;
+  final bool isSpeakingLearning;
+  final bool isListeningForCommand;
+  final String voiceCommandStatus;
+  final int? activeTableNumber;
+  final int? activeTableLine;
+  final int? activeCountingNumber;
+
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      width: MediaQuery.sizeOf(context).width.clamp(280.0, 360.0).toDouble(),
+      child: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFFFFF4B8), Color(0xFFCFF3FF)],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              _LearningDrawerHeader(
+                isSpeakingLearning: isSpeakingLearning,
+                onStopPressed: onStopPressed,
+                onMicPressed: onMicPressed,
+                isListeningForCommand: isListeningForCommand,
+                voiceCommandStatus: voiceCommandStatus,
+              ),
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                  children: [
+                    _DrawerSection(
+                      icon: Icons.grid_on_rounded,
+                      title: 'Tables',
+                      child: Column(
+                        children: [
+                          _TimesTable(
+                            number: 2,
+                            onPressed: onTablePressed,
+                            activeLine: activeTableNumber == 2
+                                ? activeTableLine
+                                : null,
+                          ),
+                          _TimesTable(
+                            number: 3,
+                            onPressed: onTablePressed,
+                            activeLine: activeTableNumber == 3
+                                ? activeTableLine
+                                : null,
+                          ),
+                          _TimesTable(
+                            number: 4,
+                            onPressed: onTablePressed,
+                            activeLine: activeTableNumber == 4
+                                ? activeTableLine
+                                : null,
+                          ),
+                          _TimesTable(
+                            number: 5,
+                            onPressed: onTablePressed,
+                            activeLine: activeTableNumber == 5
+                                ? activeTableLine
+                                : null,
+                          ),
+                          _TimesTable(
+                            number: 6,
+                            onPressed: onTablePressed,
+                            activeLine: activeTableNumber == 6
+                                ? activeTableLine
+                                : null,
+                          ),
+                          _TimesTable(
+                            number: 7,
+                            onPressed: onTablePressed,
+                            activeLine: activeTableNumber == 7
+                                ? activeTableLine
+                                : null,
+                          ),
+                          _TimesTable(
+                            number: 8,
+                            onPressed: onTablePressed,
+                            activeLine: activeTableNumber == 8
+                                ? activeTableLine
+                                : null,
+                          ),
+                          _TimesTable(
+                            number: 9,
+                            onPressed: onTablePressed,
+                            activeLine: activeTableNumber == 9
+                                ? activeTableLine
+                                : null,
+                          ),
+                          _TimesTable(
+                            number: 10,
+                            onPressed: onTablePressed,
+                            activeLine: activeTableNumber == 10
+                                ? activeTableLine
+                                : null,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    _DrawerSection(
+                      icon: Icons.format_list_numbered_rounded,
+                      title: 'Counting 1-100',
+                      onHeaderTap: onCountingPressed,
+                      child: Column(
+                        children: List.generate(
+                          100,
+                          (index) => _CountingRow(
+                            number: index + 1,
+                            isActive: activeCountingNumber == index + 1,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LearningDrawerHeader extends StatelessWidget {
+  const _LearningDrawerHeader({
+    required this.isSpeakingLearning,
+    required this.onStopPressed,
+    required this.onMicPressed,
+    required this.isListeningForCommand,
+    required this.voiceCommandStatus,
+  });
+
+  final bool isSpeakingLearning;
+  final VoidCallback onStopPressed;
+  final VoidCallback onMicPressed;
+  final bool isListeningForCommand;
+  final String voiceCommandStatus;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              IconButton(
+                key: const ValueKey('close-learning-menu'),
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.arrow_back_rounded),
+                color: const Color(0xFF7C3AED),
+                tooltip: 'Back to calculator',
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  side: const BorderSide(color: Color(0xFF06D6A0), width: 3),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  fixedSize: const Size(48, 48),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Container(
+                width: 48,
+                height: 48,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFF06D6A0), width: 3),
+                ),
+                child: const Icon(
+                  Icons.school_rounded,
+                  color: Color(0xFF7C3AED),
+                  size: 30,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'Learning Menu',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Color(0xFF243B53),
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              if (isSpeakingLearning) ...[
+                const SizedBox(width: 8),
+                IconButton(
+                  key: const ValueKey('stop-learning-speech'),
+                  onPressed: onStopPressed,
+                  icon: const Icon(Icons.stop_rounded),
+                  color: Colors.white,
+                  tooltip: 'Stop',
+                  style: IconButton.styleFrom(
+                    backgroundColor: const Color(0xFFFF5E78),
+                    side: const BorderSide(color: Colors.white, width: 2),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    fixedSize: const Size(48, 48),
+                  ),
+                ),
+              ],
+              const SizedBox(width: 8),
+              IconButton(
+                key: const ValueKey('voice-command-button'),
+                onPressed: onMicPressed,
+                icon: Icon(
+                  isListeningForCommand
+                      ? Icons.mic_rounded
+                      : Icons.mic_none_rounded,
+                ),
+                color: Colors.white,
+                tooltip: 'Voice command',
+                style: IconButton.styleFrom(
+                  backgroundColor: isListeningForCommand
+                      ? const Color(0xFFFF5E78)
+                      : const Color(0xFF7C3AED),
+                  side: const BorderSide(color: Colors.white, width: 2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  fixedSize: const Size(48, 48),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.86),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Text(
+              voiceCommandStatus,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Color(0xFF5C677D),
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DrawerSection extends StatelessWidget {
+  const _DrawerSection({
+    required this.icon,
+    required this.title,
+    required this.child,
+    this.onHeaderTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final Widget child;
+  final VoidCallback? onHeaderTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.88),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white, width: 2),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              key: ValueKey('drawer-section-$title'),
+              onTap: onHeaderTap,
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    Icon(icon, color: const Color(0xFF7C3AED), size: 22),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Color(0xFF243B53),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                    if (onHeaderTap != null)
+                      const Icon(
+                        Icons.volume_up_rounded,
+                        color: Color(0xFF06A77D),
+                        size: 20,
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+class _TimesTable extends StatelessWidget {
+  const _TimesTable({
+    required this.number,
+    required this.onPressed,
+    required this.activeLine,
+  });
+
+  final int number;
+  final ValueChanged<int> onPressed;
+  final int? activeLine;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      type: MaterialType.transparency,
+      child: ExpansionTile(
+        key: ValueKey('table-$number'),
+        onExpansionChanged: (expanded) {
+          if (expanded) {
+            onPressed(number);
+          }
+        },
+        tilePadding: EdgeInsets.zero,
+        childrenPadding: const EdgeInsets.only(bottom: 8),
+        iconColor: const Color(0xFF7C3AED),
+        collapsedIconColor: const Color(0xFF7C3AED),
+        title: Text(
+          '$number Table / ${_urduNumbers[number]} کا پہاڑا',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            color: Color(0xFF243B53),
+            fontSize: 14,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        children: List.generate(10, (index) {
+          final multiplier = index + 1;
+          final answer = number * multiplier;
+          return _MathFactRow(
+            left: '$number × $multiplier = $answer',
+            right:
+                '${_urduNumbers[number]} ضرب ${_urduNumbers[multiplier]} = ${_urduNumbers[answer]}',
+            isActive: activeLine == multiplier,
+          );
+        }),
+      ),
+    );
+  }
+}
+
+class _MathFactRow extends StatelessWidget {
+  const _MathFactRow({
+    required this.left,
+    required this.right,
+    required this.isActive,
+  });
+
+  final String left;
+  final String right;
+  final bool isActive;
+
+  @override
+  Widget build(BuildContext context) {
+    return _ActiveAutoScroller(
+      isActive: isActive,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          color: isActive ? const Color(0xFFFFC857) : const Color(0xFFFFF4B8),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isActive ? const Color(0xFFFF5E78) : Colors.transparent,
+            width: 2,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                if (isActive) ...[
+                  const Icon(
+                    Icons.volume_up_rounded,
+                    color: Color(0xFF7C3AED),
+                    size: 18,
+                  ),
+                  const SizedBox(width: 6),
+                ],
+                Expanded(
+                  child: Text(
+                    left,
+                    style: const TextStyle(
+                      color: Color(0xFF243B53),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 2),
+            Text(
+              right,
+              textDirection: TextDirection.rtl,
+              style: const TextStyle(
+                color: Color(0xFF5C677D),
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ActiveAutoScroller extends StatefulWidget {
+  const _ActiveAutoScroller({required this.isActive, required this.child});
+
+  final bool isActive;
+  final Widget child;
+
+  @override
+  State<_ActiveAutoScroller> createState() => _ActiveAutoScrollerState();
+}
+
+class _ActiveAutoScrollerState extends State<_ActiveAutoScroller> {
+  @override
+  void initState() {
+    super.initState();
+    _scrollIfActive();
+  }
+
+  @override
+  void didUpdateWidget(covariant _ActiveAutoScroller oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isActive && !oldWidget.isActive) {
+      _scrollIfActive();
+    }
+  }
+
+  void _scrollIfActive() {
+    if (!widget.isActive) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      Scrollable.ensureVisible(
+        context,
+        alignment: 0.45,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeOutCubic,
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
+class _CountingRow extends StatelessWidget {
+  const _CountingRow({required this.number, required this.isActive});
+
+  final int number;
+  final bool isActive;
+
+  @override
+  Widget build(BuildContext context) {
+    return _ActiveAutoScroller(
+      isActive: isActive,
+      child: Container(
+        key: ValueKey('counting-row-$number'),
+        margin: const EdgeInsets.only(bottom: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          color: isActive
+              ? const Color(0xFFFFC857)
+              : number.isEven
+              ? const Color(0xFFCFF3FF)
+              : const Color(0xFFFFD3F0),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isActive ? const Color(0xFFFF5E78) : Colors.transparent,
+            width: 2,
+          ),
+        ),
+        child: Row(
+          children: [
+            if (isActive) ...[
+              const Icon(
+                Icons.volume_up_rounded,
+                color: Color(0xFF7C3AED),
+                size: 18,
+              ),
+              const SizedBox(width: 6),
+            ],
+            SizedBox(
+              width: 34,
+              child: Text(
+                '$number',
+                style: const TextStyle(
+                  color: Color(0xFF243B53),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+            Expanded(
+              child: Text(
+                _englishNumberForLearning(number),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Color(0xFF243B53),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                _urduNumbers[number] ?? '',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textDirection: TextDirection.rtl,
+                style: const TextStyle(
+                  color: Color(0xFF5C677D),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static String _englishNumberForLearning(int number) {
+    const ones = [
+      'zero',
+      'one',
+      'two',
+      'three',
+      'four',
+      'five',
+      'six',
+      'seven',
+      'eight',
+      'nine',
+      'ten',
+      'eleven',
+      'twelve',
+      'thirteen',
+      'fourteen',
+      'fifteen',
+      'sixteen',
+      'seventeen',
+      'eighteen',
+      'nineteen',
+    ];
+    const tens = [
+      '',
+      '',
+      'twenty',
+      'thirty',
+      'forty',
+      'fifty',
+      'sixty',
+      'seventy',
+      'eighty',
+      'ninety',
+    ];
+
+    if (number < 20) {
+      return ones[number];
+    }
+    if (number < 100) {
+      final rest = number % 10;
+      return rest == 0
+          ? tens[number ~/ 10]
+          : '${tens[number ~/ 10]} ${ones[rest]}';
+    }
+
+    return 'one hundred';
+  }
+}
+
 class _HistoryPanel extends StatelessWidget {
   const _HistoryPanel({
     required this.records,
@@ -1148,15 +2314,10 @@ class _HistoryPanel extends StatelessWidget {
 }
 
 class _CalculationRecord {
-  const _CalculationRecord({
-    required this.expression,
-    required this.answer,
-    required this.speech,
-  });
+  const _CalculationRecord({required this.expression, required this.answer});
 
   final String expression;
   final String answer;
-  final String speech;
 }
 
 class _InfoChip extends StatelessWidget {
@@ -1203,11 +2364,13 @@ class _InfoChip extends StatelessWidget {
 class _Header extends StatelessWidget {
   const _Header({
     required this.speakUrdu,
+    required this.onCapPressed,
     required this.onLanguagePressed,
     required this.onAboutPressed,
   });
 
   final bool speakUrdu;
+  final VoidCallback onCapPressed;
   final VoidCallback onLanguagePressed;
   final VoidCallback onAboutPressed;
 
@@ -1215,24 +2378,32 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(
-          width: 52,
-          height: 52,
-          decoration: BoxDecoration(
+        Tooltip(
+          message: 'Learning menu',
+          child: Material(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            boxShadow: const [
-              BoxShadow(
-                blurRadius: 16,
-                color: Color(0x26000000),
-                offset: Offset(0, 8),
+            elevation: 5,
+            shadowColor: const Color(0x22000000),
+            child: InkWell(
+              key: const ValueKey('learning-menu-button'),
+              onTap: onCapPressed,
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                width: 52,
+                height: 52,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFF06D6A0), width: 3),
+                ),
+                child: const Icon(
+                  Icons.school_rounded,
+                  color: Color(0xFF7C3AED),
+                  size: 32,
+                ),
               ),
-            ],
-          ),
-          child: const Icon(
-            Icons.school_rounded,
-            color: Color(0xFF7C3AED),
-            size: 32,
+            ),
           ),
         ),
         const SizedBox(width: 12),
@@ -1453,12 +2624,12 @@ class _KidButton extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(3),
               child: Center(
-                    child: _PictureBadge(
-                      label: spec.label,
-                      background: spec.badgeColor,
-                      foreground: const Color(0xFF243B53),
-                      pictureIndex: spec.pictureIndex,
-                    ),
+                child: _PictureBadge(
+                  label: spec.label,
+                  background: spec.badgeColor,
+                  foreground: spec.color,
+                  pictureIndex: spec.pictureIndex,
+                ),
               ),
             ),
           ),
