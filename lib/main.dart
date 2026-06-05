@@ -449,6 +449,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   int? _activeTableLine;
   int? _activeCountingNumber;
   bool _isListeningForCommand = false;
+  bool _isRetryingSpeechListen = false;
   String _voiceCommandStatus = 'Tap mic and say table or counting';
   final List<_CalculationRecord> _history = [];
   final FlutterTts _speaker = FlutterTts();
@@ -1070,6 +1071,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     }
 
     try {
+      await _stopSpeakerSafely();
       final available = await _speech.initialize(
         onStatus: (status) {
           if (!mounted) {
@@ -1081,17 +1083,28 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             });
           }
         },
-        onError: (_) {
+        onError: (error) {
           if (!mounted) {
+            return;
+          }
+          if (error.errorMsg == 'error_network') {
+            setState(() {
+              _isListeningForCommand = false;
+              _voiceCommandStatus =
+                  'Network speech failed. Trying offline speech...';
+            });
+            if (!_isRetryingSpeechListen) {
+              _isRetryingSpeechListen = true;
+              unawaited(_startSpeechCommandListen(onDeviceOnly: true));
+            }
             return;
           }
           setState(() {
             _isListeningForCommand = false;
-            _voiceCommandStatus = 'Mic not ready';
+            _voiceCommandStatus = error.permanent
+                ? 'Speech unavailable: ${error.errorMsg}'
+                : 'Could not hear: ${error.errorMsg}';
           });
-          unawaited(
-            _speak(_speakUrdu ? 'مائک تیار نہیں' : 'microphone not ready'),
-          );
         },
       );
 
@@ -1100,50 +1113,109 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           return;
         }
         setState(() {
-          _voiceCommandStatus = 'Mic permission needed';
+          _voiceCommandStatus =
+              'Speech service unavailable${_speechServiceHint()}';
         });
         unawaited(
           _speak(
-            _speakUrdu ? 'مائک اجازت دیں' : 'microphone permission needed',
+            _speakUrdu
+                ? 'اس ڈیوائس پر آواز کی پہچان دستیاب نہیں'
+                : 'speech recognition is not available on this device',
           ),
         );
         return;
       }
 
+      final localeId = await _preferredSpeechLocale();
       setState(() {
         _isListeningForCommand = true;
+        _isRetryingSpeechListen = false;
         _voiceCommandStatus = _speakUrdu
             ? 'بولیں: ٹیبل یا گنتی'
             : 'Say: read table 2 or counting';
       });
 
-      // ignore: deprecated_member_use
-      await _speech.listen(
-        // ignore: deprecated_member_use
-        localeId: _speakUrdu ? 'ur_PK' : 'en_US',
-        // ignore: deprecated_member_use
-        listenFor: const Duration(seconds: 6),
-        // ignore: deprecated_member_use
-        pauseFor: const Duration(seconds: 2),
-        onResult: (result) {
-          if (!result.finalResult) {
-            return;
-          }
-          final command = result.recognizedWords.trim();
-          if (command.isEmpty) {
-            return;
-          }
-          unawaited(_handleLearningCommand(command));
-        },
-      );
+      await _startSpeechCommandListen(localeId: localeId);
     } catch (_) {
       if (!mounted) {
         return;
       }
       setState(() {
         _isListeningForCommand = false;
-        _voiceCommandStatus = 'Mic not ready';
+        _voiceCommandStatus =
+            'Speech service unavailable${_speechServiceHint()}';
       });
+    }
+  }
+
+  Future<void> _startSpeechCommandListen({
+    String? localeId,
+    bool onDeviceOnly = false,
+  }) async {
+    final listenLocale = localeId ?? await _preferredSpeechLocale();
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _isListeningForCommand = true;
+      _voiceCommandStatus = onDeviceOnly
+          ? 'Listening offline: say table or counting'
+          : _voiceCommandStatus;
+    });
+
+    // ignore: deprecated_member_use
+    await _speech.listen(
+      // ignore: deprecated_member_use
+      localeId: listenLocale,
+      // ignore: deprecated_member_use
+      listenFor: const Duration(seconds: 6),
+      // ignore: deprecated_member_use
+      pauseFor: const Duration(seconds: 2),
+      listenOptions: stt.SpeechListenOptions(
+        partialResults: false,
+        onDevice: onDeviceOnly,
+        cancelOnError: false,
+      ),
+      onResult: (result) {
+        if (!result.finalResult) {
+          return;
+        }
+        final command = result.recognizedWords.trim();
+        if (command.isEmpty) {
+          return;
+        }
+        unawaited(_handleLearningCommand(command));
+      },
+    );
+  }
+
+  String _speechServiceHint() {
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return '. Install or enable Speech Services by Google';
+    }
+    if (defaultTargetPlatform == TargetPlatform.windows) {
+      return '. Enable Windows speech recognition and microphone privacy';
+    }
+    return '';
+  }
+
+  Future<String?> _preferredSpeechLocale() async {
+    try {
+      final locales = await _speech.locales();
+      final preferredPrefixes = _speakUrdu
+          ? const ['ur_', 'ur-', 'en_US', 'en-']
+          : const ['en_US', 'en-'];
+      for (final prefix in preferredPrefixes) {
+        for (final locale in locales) {
+          if (locale.localeId.startsWith(prefix)) {
+            return locale.localeId;
+          }
+        }
+      }
+      final systemLocale = await _speech.systemLocale();
+      return systemLocale?.localeId;
+    } catch (_) {
+      return null;
     }
   }
 
